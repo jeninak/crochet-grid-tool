@@ -1,0 +1,62 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crochet Grid Generator</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Crochet Grid Generator</h1>
+        <p>Turn your images into crochet patterns</p>
+    </header>
+
+    <main>
+        <section class="settings">
+            <h2>1. Upload your image</h2>
+
+            <input type="file" id="imageInput" accept="image/png, image/jpeg, image/webp">
+
+            <h2>2. Grid dimensions</h2>
+
+            <div class="dimension-inputs">
+                <label>
+                    Width (stitches)
+                    <input type="number" id="gridWidth" value="150" min="1" max="300">
+                </label>
+
+                <label>
+                    Height (stitches)
+                    <input type="number" id="gridHeight" value="180" min="1" max="300">
+                </label>
+            </div>
+
+            <button id="generateBtn" disabled>
+                Generate crochet grid
+            </button>
+
+            <p id="status"></p>
+        </section>
+
+        <section class="preview">
+            <div class="preview-panel">
+                <h2>Original image</h2>
+                <img id="originalImage" alt="Uploaded image preview">
+            </div>
+
+            <div class="preview-panel">
+                <h2>Crochet grid</h2>
+                <div id="gridContainer">
+                    <p>Your generated grid will appear here.</p>
+                    <canvas id="gridCanvas" hidden></canvas>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
