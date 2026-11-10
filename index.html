@@ -34,6 +34,22 @@
                 </label>
             </div>
 
+            <h2>3. Adjust pattern colors</h2>
+            <div class="color-controls">
+                <label>
+                    Brightness <output id="brightnessValue">100%</output>
+                    <input type="range" id="brightness" min="0" max="200" value="100">
+                </label>
+                <label>
+                    Contrast <output id="contrastValue">100%</output>
+                    <input type="range" id="contrast" min="0" max="200" value="100">
+                </label>
+                <label>
+                    Saturation <output id="saturationValue">100%</output>
+                    <input type="range" id="saturation" min="0" max="200" value="100">
+                </label>
+            </div>
+
             <button id="generateBtn" disabled>
                 Generate crochet grid
             </button>
@@ -50,12 +66,26 @@
             <div class="preview-panel">
                 <h2>Crochet grid</h2>
                 <div id="gridContainer">
-                    <p>Your generated grid will appear here.</p>
+                    <p id="gridPlaceholder">Your generated grid will appear here.</p>
                     <canvas id="gridCanvas" hidden></canvas>
+                </div>
+                <div class="pattern-actions">
+                    <button id="enlargeBtn" disabled>Preview larger</button>
+                    <button id="downloadBtn" disabled>Download PNG</button>
                 </div>
             </div>
         </section>
     </main>
+
+    <dialog id="largePreviewDialog">
+        <div class="large-preview-header">
+            <h2>Pattern preview</h2>
+            <button id="closePreviewBtn" type="button">Close</button>
+        </div>
+        <div class="large-preview-content">
+            <canvas id="largeGridCanvas"></canvas>
+        </div>
+    </dialog>
 
     <script src="script.js"></script>
 </body>

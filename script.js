@@ -7,42 +7,57 @@ const gridHeightInput = document.getElementById("gridHeight");
 
 const generateBtn = document.getElementById("generateBtn");
 const gridCanvas = document.getElementById("gridCanvas");
-const gridContainer = document.getElementById("gridContainer");
+const gridPlaceholder = document.getElementById("gridPlaceholder");
 const status = document.getElementById("status");
+const brightnessInput = document.getElementById("brightness");
+const contrastInput = document.getElementById("contrast");
+const saturationInput = document.getElementById("saturation");
+const enlargeBtn = document.getElementById("enlargeBtn");
+const downloadBtn = document.getElementById("downloadBtn");
+const largePreviewDialog = document.getElementById("largePreviewDialog");
+const largeGridCanvas = document.getElementById("largeGridCanvas");
 
 const ctx = gridCanvas.getContext("2d");
+const largeCtx = largeGridCanvas.getContext("2d");
 
 const STITCH_SIZE = 12;
 
 let uploadedImage = null;
-let contrast = 100;
-let brightness = 100;
+let generatedDimensions = null;
 
 function enhanceImage(imageData) {
     const data = imageData.data;
-
-    const contrastFactor =
-        (259 * (contrast + 255)) /
-        (255 * (259 - contrast));
+    const brightness = Number(brightnessInput.value) / 100;
+    const contrast = Number(contrastInput.value) / 100;
+    const saturation = Number(saturationInput.value) / 100;
 
     for (let i = 0; i < data.length; i += 4) {
+        const red = data[i] * brightness;
+        const green = data[i + 1] * brightness;
+        const blue = data[i + 2] * brightness;
 
-        for (let c = 0; c < 3; c++) {
+        const average = red * 0.2126 + green * 0.7152 + blue * 0.0722;
 
-            let value = data[i + c];
+        const adjustedRed = (average + (red - average) * saturation - 128) * contrast + 128;
+        const adjustedGreen = (average + (green - average) * saturation - 128) * contrast + 128;
+        const adjustedBlue = (average + (blue - average) * saturation - 128) * contrast + 128;
 
-            value *= brightness / 100;
-
-            value = contrastFactor * (value - 128) + 128;
-
-            data[i + c] = Math.max(
-                0,
-                Math.min(255, value)
-            );
-        }
+        data[i] = Math.max(0, Math.min(255, adjustedRed));
+        data[i + 1] = Math.max(0, Math.min(255, adjustedGreen));
+        data[i + 2] = Math.max(0, Math.min(255, adjustedBlue));
     }
 
     return imageData;
+}
+
+function updateColorControls() {
+    for (const control of [brightnessInput, contrastInput, saturationInput]) {
+        document.getElementById(`${control.id}Value`).value = `${control.value}%`;
+    }
+
+    if (uploadedImage && generatedDimensions) {
+        createGrid(generatedDimensions.width, generatedDimensions.height);
+    }
 }
 
 imageInput.addEventListener("change", function(event) {
@@ -67,6 +82,11 @@ imageInput.addEventListener("change", function(event) {
             originalImage.style.display = "block";
 
             generateBtn.disabled = false;
+            generatedDimensions = null;
+            gridCanvas.hidden = true;
+            gridPlaceholder.hidden = false;
+            enlargeBtn.disabled = true;
+            downloadBtn.disabled = true;
 
             status.textContent = "Image uploaded successfully!";
         };
@@ -106,6 +126,40 @@ generateBtn.addEventListener("click", function() {
     createGrid(gridWidth, gridHeight);
 });
 
+for (const control of [brightnessInput, contrastInput, saturationInput]) {
+    control.addEventListener("input", updateColorControls);
+}
+
+enlargeBtn.addEventListener("click", function() {
+    largeGridCanvas.width = gridCanvas.width;
+    largeGridCanvas.height = gridCanvas.height;
+    largeCtx.drawImage(gridCanvas, 0, 0);
+    largePreviewDialog.showModal();
+});
+
+document.getElementById("closePreviewBtn").addEventListener("click", function() {
+    largePreviewDialog.close();
+});
+
+downloadBtn.addEventListener("click", function() {
+    gridCanvas.toBlob(function(blob) {
+        if (!blob) {
+            status.textContent = "Could not create the pattern image.";
+            return;
+        }
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "crochet-pattern.png";
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(function() {
+            URL.revokeObjectURL(url);
+        }, 1000);
+    }, "image/png");
+});
 
 function createGrid(width, height) {
     const tempCanvas = document.createElement("canvas");
@@ -143,6 +197,10 @@ function createGrid(width, height) {
     gridCanvas.height = height * STITCH_SIZE;
 
     gridCanvas.hidden = false;
+    gridPlaceholder.hidden = true;
+    generatedDimensions = { width, height };
+    enlargeBtn.disabled = false;
+    downloadBtn.disabled = false;
 
     for (let y = 0; y < height; y++) {
 
