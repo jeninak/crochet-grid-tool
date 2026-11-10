@@ -94,9 +94,8 @@ button:disabled {
 }
 
 #gridCanvas {
-    max-width: 100%;
-    height: auto;
-    image-rendering: pixelated;
+    display: block;
+    margin: 0 auto;
 }
 
 #status {
