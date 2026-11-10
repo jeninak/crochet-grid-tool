@@ -24,6 +24,8 @@ No installation or build step is required.
 
 The app is a static website and processes the selected image in your browser.
 
+![Pattern setup with an image, grid dimensions, and color adjustment controls](./assets/pattern-generation.png)
+
 ## How to use
 
 ### Create a pattern
@@ -36,6 +38,19 @@ The app is a static website and processes the selected image in your browser.
 
 Use **Preview larger** to inspect the chart. Select **Download PNG** to save an image of the pattern, including its grid lines.
 
+Example input and generated chart:
+
+<table>
+  <tr>
+    <th>Original image</th>
+    <th>Generated crochet pattern</th>
+  </tr>
+  <tr>
+    <td><img src="./assets/original.png" alt="Original image used to create the example pattern" width="360"></td>
+    <td><img src="./assets/crochet-pattern.png" alt="Generated crochet chart with white and dark stitches" width="360"></td>
+  </tr>
+</table>
+
 ### Edit individual stitches
 
 1. Generate a pattern or open a saved project.
@@ -46,11 +61,15 @@ Use **Preview larger** to inspect the chart. Select **Download PNG** to save an 
 
 Edits update the pattern and crochet workspace. Generating the pattern again from the source image replaces existing stitch edits.
 
+![Pixel editor with stitch-color controls and an editable crochet grid](./assets/pixel-editor.png)
+
 ### Track crochet progress
 
 Open **Crochet workspace** to follow the chart while crocheting. Use **Previous row**, **Next row**, or the **Working row** field to move the highlight. Rows are numbered from top to bottom.
 
 The row highlight is a temporary guide and is not included in the downloaded PNG.
+
+![Crochet workspace with row navigation and the current row highlighted](./assets/workspace.png)
 
 ### Save and reopen a project
 
