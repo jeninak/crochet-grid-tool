@@ -124,9 +124,56 @@ main {
     color: #a7afa8;
 }
 
+.project-file-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin: -6px 0 22px;
+}
+
+.project-file-controls > span {
+    color: var(--muted);
+    font-size: 0.86rem;
+}
+
+#projectInput {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.project-import-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 10px 15px;
+    border: 1px solid #d5ded5;
+    border-radius: 9px;
+    background: var(--paper);
+    color: var(--green);
+    cursor: pointer;
+    font-size: 0.9rem;
+    font-weight: 650;
+    transition: background 160ms ease, border-color 160ms ease;
+}
+
+.project-import-button:hover {
+    border-color: #b6c8b9;
+    background: var(--soft-green);
+}
+
+#projectInput:focus-visible + #saveProjectBtn {
+    outline: 3px solid rgb(78 130 102 / 35%);
+    outline-offset: 2px;
+}
+
 .settings,
 .preview-panel,
-.crochet-workspace {
+.crochet-workspace,
+.editor-workspace {
     border: 1px solid rgb(55 72 60 / 6%);
     border-radius: 18px;
     background: var(--paper);
@@ -374,12 +421,106 @@ button:disabled {
     padding: clamp(20px, 3vw, 32px);
 }
 
+.editor-workspace {
+    padding: clamp(20px, 3vw, 32px);
+}
+
+.editor-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fafbf8;
+}
+
+.stitch-color-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #59665e;
+    font-size: 0.9rem;
+    font-weight: 650;
+}
+
+#stitchColor {
+    width: 42px;
+    height: 38px;
+    padding: 3px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: white;
+    cursor: pointer;
+}
+
+.color-swatch {
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 2px solid #d5d9d3;
+    border-radius: 50%;
+}
+
+#darkGreySwatch {
+    background: #333;
+}
+
+#whiteSwatch {
+    border-color: #b9c0ba;
+    background: #fff;
+}
+
+.editor-toolbar > p {
+    flex-basis: 100%;
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.88rem;
+}
+
+#editorGridContainer {
+    max-height: min(72vh, 900px);
+    min-height: 280px;
+    overflow: auto;
+    border: 1px solid #eeede6;
+    border-radius: 12px;
+    background-color: #fafaf6;
+    background-image: linear-gradient(45deg, #f0efe9 25%, transparent 25%), linear-gradient(-45deg, #f0efe9 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0efe9 75%), linear-gradient(-45deg, transparent 75%, #f0efe9 75%);
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+    background-size: 16px 16px;
+}
+
+.editor-canvas-stack {
+    position: relative;
+    width: max-content;
+    margin: 0 auto;
+}
+
+#editorCanvas {
+    display: block;
+    cursor: crosshair;
+    touch-action: none;
+}
+
+#editorGridCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
 .workspace-heading {
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
     gap: 18px;
     margin-bottom: 20px;
+}
+
+.project-file-controls > span {
+    flex-basis: 100%;
 }
 
 .workspace-heading h2 {
@@ -615,6 +756,13 @@ dialog::backdrop {
         flex: 1;
         padding: 9px 10px;
         font-size: 0.86rem;
+    }
+
+    .project-file-controls > button,
+    .project-import-button {
+        flex: 1;
+        justify-content: center;
+        text-align: center;
     }
 
     .row-controls {

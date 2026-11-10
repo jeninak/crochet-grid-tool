@@ -19,10 +19,20 @@
             <button id="patternTab" type="button" role="tab" aria-selected="true" aria-controls="patternView">
                 Pattern setup
             </button>
+            <button id="editorTab" type="button" role="tab" aria-selected="false" aria-controls="editorWorkspace" disabled>
+                Pixel editor
+            </button>
             <button id="crochetTab" type="button" role="tab" aria-selected="false" aria-controls="crochetWorkspace" disabled>
                 Crochet workspace
             </button>
         </nav>
+        <div class="project-file-controls">
+            <label class="project-import-button" for="projectInput">Open saved pattern</label>
+            <input id="projectInput" type="file" accept=".json,application/json">
+            <button id="saveProjectBtn" type="button" disabled>Save editable project</button>
+            <span>Save or reopen a pattern with all stitch colors intact.</span>
+        </div>
+        <p id="status" role="status" aria-live="polite"></p>
 
         <div id="patternView" role="tabpanel" aria-labelledby="patternTab">
             <section class="settings">
@@ -73,8 +83,6 @@
                 <button id="generateBtn" disabled>
                     Generate crochet grid
                 </button>
-
-                <p id="status"></p>
             </section>
 
             <section class="preview">
@@ -96,6 +104,32 @@
                 </div>
             </section>
         </div>
+
+        <section id="editorWorkspace" class="editor-workspace" role="tabpanel" aria-labelledby="editorTab" hidden>
+            <div class="workspace-heading">
+                <div>
+                    <p class="workspace-eyebrow">Pattern editor</p>
+                    <h2>Adjust individual stitches</h2>
+                </div>
+                <p id="editorDimensions" class="workspace-dimensions"></p>
+            </div>
+            <div class="editor-toolbar">
+                <label class="stitch-color-control" for="stitchColor">
+                    Stitch color
+                    <input id="stitchColor" type="color" value="#333333">
+                </label>
+                <button id="darkGreySwatch" type="button" class="color-swatch" aria-label="Select dark grey" title="Dark grey"></button>
+                <button id="whiteSwatch" type="button" class="color-swatch" aria-label="Select white" title="White"></button>
+                <button id="undoEditBtn" type="button" disabled>Undo last stroke</button>
+                <p>Click or drag over stitches to recolor them. Choose white to erase a stitch.</p>
+            </div>
+            <div id="editorGridContainer">
+                <div class="editor-canvas-stack">
+                    <canvas id="editorCanvas" aria-label="Editable crochet stitch pattern"></canvas>
+                    <canvas id="editorGridCanvas" aria-hidden="true"></canvas>
+                </div>
+            </div>
+        </section>
 
         <section id="crochetWorkspace" class="crochet-workspace" role="tabpanel" aria-labelledby="crochetTab" hidden>
             <div class="workspace-heading">
@@ -136,6 +170,8 @@
 
     <script src="image-processing.js"></script>
     <script src="grid-renderer.js"></script>
+    <script src="pixel-editor.js"></script>
+    <script src="pattern-project.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

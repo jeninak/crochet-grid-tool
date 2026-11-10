@@ -2,21 +2,46 @@ window.CrochetGridRenderer = (function() {
     const STITCH_SIZE = 12;
 
     function draw(imageData, width, height, canvas, twoColor = false) {
-        const context = canvas.getContext("2d");
         const pixels = imageData.data;
+        const colors = new Uint32Array(width * height);
+
+        for (let index = 0; index < colors.length; index++) {
+            const pixelIndex = index * 4;
+            colors[index] =
+                (pixels[pixelIndex] << 16) |
+                (pixels[pixelIndex + 1] << 8) |
+                pixels[pixelIndex + 2];
+        }
+
+        drawColors(colors, width, height, canvas, twoColor);
+    }
+
+    function drawColors(colors, width, height, canvas, twoColor = false, includeGrid = true) {
+        const context = canvas.getContext("2d");
 
         canvas.width = width * STITCH_SIZE;
         canvas.height = height * STITCH_SIZE;
 
         for (let y = 0; y < height; y++) {
             for (let x = 0; x < width; x++) {
-                const index = (y * width + x) * 4;
-                context.fillStyle = `rgb(${pixels[index]}, ${pixels[index + 1]}, ${pixels[index + 2]})`;
+                const color = colors[y * width + x];
+                const red = (color >> 16) & 255;
+                const green = (color >> 8) & 255;
+                const blue = color & 255;
+                context.fillStyle = `rgb(${red}, ${green}, ${blue})`;
                 context.fillRect(x * STITCH_SIZE, y * STITCH_SIZE, STITCH_SIZE, STITCH_SIZE);
             }
         }
 
-        drawGridLines(context, width, height, twoColor);
+        if (includeGrid) {
+            drawGridLines(context, width, height, twoColor);
+        }
+    }
+
+    function drawGridOverlay(canvas, width, height, twoColor = false) {
+        canvas.width = width * STITCH_SIZE;
+        canvas.height = height * STITCH_SIZE;
+        drawGridLines(canvas.getContext("2d"), width, height, twoColor);
     }
 
     function drawGridLines(context, width, height, twoColor) {
@@ -64,5 +89,5 @@ window.CrochetGridRenderer = (function() {
         context.strokeRect(1, top + 1, canvas.width - 2, STITCH_SIZE - 2);
     }
 
-    return { draw, highlightRow };
+    return { stitchSize: STITCH_SIZE, draw, drawColors, drawGridOverlay, highlightRow };
 })();
