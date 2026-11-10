@@ -63,6 +63,8 @@ Edits update the pattern and crochet workspace. Generating the pattern again fro
 
 ![Pixel editor with stitch-color controls and an editable crochet grid](./assets/pixel-editor.png)
 
+To compare stitch placement with the source, enable **Show original image guide**. Choose whether it appears on top of or underneath the stitches, then adjust its opacity. The guide is a visual aid only and does not change stitch colors.
+
 ### Track crochet progress
 
 Open **Crochet workspace** to follow the chart while crocheting. Use **Previous row**, **Next row**, or the **Working row** field to move the highlight. Rows are numbered from top to bottom.
@@ -73,7 +75,7 @@ The row highlight is a temporary guide and is not included in the downloaded PNG
 
 ### Save and reopen a project
 
-Select **Save editable project** to download a `.json` file. To continue later, open the tool and select **Open saved pattern**, then choose that project file. The saved project restores the stitch colors, dimensions, color settings, and current row; the original uploaded image is not required.
+Select **Save editable project** to download a `.json` file. To continue later, open the tool and select **Open saved pattern**, then choose that project file. The saved project restores the stitch colors, dimensions, color settings, current row, and a resized copy of the source image for the pixel-editor guide.
 
 Use the PNG download for viewing or printing. Use the JSON project to continue editing or crocheting later.
 

@@ -8,6 +8,8 @@ window.CrochetPatternProject = (function() {
             currentRow: pattern.currentRow,
             twoColor: pattern.twoColor,
             adjustments: pattern.adjustments,
+            guideImage: pattern.guideImage,
+            guideSettings: pattern.guideSettings,
             stitches: Array.from(pattern.stitches)
         };
     }
@@ -59,6 +61,29 @@ window.CrochetPatternProject = (function() {
             adjustments.threshold < 0 || adjustments.threshold > 255
         ) {
             throw new Error("Pattern settings are invalid.");
+        }
+
+        if (
+            project.guideImage !== undefined &&
+            (typeof project.guideImage !== "string" ||
+                !project.guideImage.startsWith("data:image/png;base64,") ||
+                project.guideImage.length > 2000000 ||
+                !/^[A-Za-z0-9+/]+={0,2}$/.test(project.guideImage.slice("data:image/png;base64,".length)))
+        ) {
+            throw new Error("Saved guide image is invalid.");
+        }
+
+        const guideSettings = project.guideSettings;
+        if (
+            guideSettings !== undefined &&
+            (!guideSettings ||
+                typeof guideSettings.visible !== "boolean" ||
+                !["above", "under"].includes(guideSettings.position) ||
+                !Number.isInteger(guideSettings.opacity) ||
+                guideSettings.opacity < 0 ||
+                guideSettings.opacity > 100)
+        ) {
+            throw new Error("Guide display settings are invalid.");
         }
     }
 

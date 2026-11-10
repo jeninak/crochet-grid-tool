@@ -16,9 +16,15 @@ const projectInput = document.getElementById("projectInput");
 const saveProjectBtn = document.getElementById("saveProjectBtn");
 const editorCanvas = document.getElementById("editorCanvas");
 const editorGridCanvas = document.getElementById("editorGridCanvas");
+const editorGuideCanvas = document.getElementById("editorGuideCanvas");
 const stitchColorInput = document.getElementById("stitchColor");
 const undoEditBtn = document.getElementById("undoEditBtn");
 const editorDimensions = document.getElementById("editorDimensions");
+const showGuideImageInput = document.getElementById("showGuideImage");
+const guidePositionInput = document.getElementById("guidePosition");
+const guideOpacityInput = document.getElementById("guideOpacity");
+const guideOpacityValue = document.getElementById("guideOpacityValue");
+const guideAvailability = document.getElementById("guideAvailability");
 const workspaceCanvas = document.getElementById("workspaceCanvas");
 const rowHighlightCanvas = document.getElementById("rowHighlightCanvas");
 const currentRowInput = document.getElementById("currentRowInput");
@@ -41,11 +47,23 @@ const largeGridCanvas = document.getElementById("largeGridCanvas");
 const largeCtx = largeGridCanvas.getContext("2d");
 
 let uploadedImage = null;
+let guideImage = null;
+let guideImageDataUrl = null;
 let generatedDimensions = null;
 let currentRow = 1;
 let stitchColors = null;
 let twoColorPattern = false;
 let patternEdited = false;
+
+function showView(view) {
+    patternView.hidden = view !== "pattern";
+    editorWorkspace.hidden = view !== "editor";
+    crochetWorkspace.hidden = view !== "crochet";
+    patternTab.setAttribute("aria-selected", String(view === "pattern"));
+    editorTab.setAttribute("aria-selected", String(view === "editor"));
+    crochetTab.setAttribute("aria-selected", String(view === "crochet"));
+    document.body.classList.toggle("editor-mode", view === "editor");
+}
 
 const pixelEditor = CrochetPixelEditor.create(
     editorCanvas,
@@ -61,15 +79,6 @@ const pixelEditor = CrochetPixelEditor.create(
     }
 );
 
-function showView(view) {
-    patternView.hidden = view !== "pattern";
-    editorWorkspace.hidden = view !== "editor";
-    crochetWorkspace.hidden = view !== "crochet";
-    patternTab.setAttribute("aria-selected", String(view === "pattern"));
-    editorTab.setAttribute("aria-selected", String(view === "editor"));
-    crochetTab.setAttribute("aria-selected", String(view === "crochet"));
-}
-
 function renderGrid(width, height) {
     const sourceCanvas = document.createElement("canvas");
     sourceCanvas.width = width;
@@ -84,6 +93,8 @@ function renderGrid(width, height) {
     sourceCtx.imageSmoothingEnabled = true;
     sourceCtx.drawImage(uploadedImage, 0, 0, width, height);
 
+    guideImage = uploadedImage;
+    guideImageDataUrl = sourceCanvas.toDataURL("image/png");
     const imageData = sourceCtx.getImageData(0, 0, width, height);
     const adjustedImage = CrochetImageProcessing.adjustColors(imageData, {
         brightness: Number(brightnessInput.value),
@@ -149,7 +160,37 @@ function renderPatternCanvases() {
     CrochetGridRenderer.drawColors(stitchColors, width, height, workspaceCanvas, twoColorPattern);
     CrochetGridRenderer.drawColors(stitchColors, width, height, editorCanvas, false, false);
     CrochetGridRenderer.drawGridOverlay(editorGridCanvas, width, height, twoColorPattern);
+    if (guideImage) {
+        drawGuideImage(width, height);
+    }
+    updateGuidePreview();
     updateWorkspaceRow();
+}
+
+function drawGuideImage(width, height) {
+    const context = editorGuideCanvas.getContext("2d");
+    editorGuideCanvas.width = width * CrochetGridRenderer.stitchSize;
+    editorGuideCanvas.height = height * CrochetGridRenderer.stitchSize;
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, editorGuideCanvas.width, editorGuideCanvas.height);
+    context.drawImage(guideImage, 0, 0, editorGuideCanvas.width, editorGuideCanvas.height);
+}
+
+function updateGuidePreview() {
+    const hasGuide = Boolean(guideImage);
+    const guideEnabled = hasGuide && showGuideImageInput.checked;
+
+    showGuideImageInput.disabled = !hasGuide;
+    guidePositionInput.disabled = !hasGuide;
+    guideOpacityInput.disabled = !hasGuide;
+    guideAvailability.textContent = hasGuide
+        ? "The source image is saved with editable projects as a guide."
+        : "No source image is available for this pattern.";
+    guideOpacityValue.value = `${guideOpacityInput.value}%`;
+    editorGuideCanvas.hidden = !guideEnabled;
+    editorGuideCanvas.style.opacity = String(Number(guideOpacityInput.value) / 100);
+    editorCanvas.style.opacity = guideEnabled && guidePositionInput.value === "under" ? "0.62" : "1";
+    editorCanvas.parentElement.dataset.guidePosition = guidePositionInput.value;
 }
 
 function updateWorkspaceRow() {
@@ -203,7 +244,13 @@ function saveProject() {
             saturation: Number(saturationInput.value),
             threshold: Number(thresholdInput.value)
         },
-        stitches: stitchColors
+        stitches: stitchColors,
+        guideImage: guideImageDataUrl,
+        guideSettings: {
+            visible: showGuideImageInput.checked,
+            position: guidePositionInput.value,
+            opacity: Number(guideOpacityInput.value)
+        }
     });
 
     const blob = new Blob([JSON.stringify(project)], { type: "application/json" });
@@ -228,6 +275,8 @@ function importProject(file) {
             const project = CrochetPatternProject.parse(reader.result);
 
             uploadedImage = null;
+            guideImage = null;
+            guideImageDataUrl = project.guideImage || null;
             stitchColors = Uint32Array.from(project.stitches);
             twoColorPattern = project.twoColor;
             patternEdited = false;
@@ -237,13 +286,31 @@ function importProject(file) {
             contrastInput.value = project.adjustments.contrast;
             saturationInput.value = project.adjustments.saturation;
             thresholdInput.value = project.adjustments.threshold;
+            showGuideImageInput.checked = project.guideSettings?.visible ?? false;
+            guidePositionInput.value = project.guideSettings?.position ?? "above";
+            guideOpacityInput.value = project.guideSettings?.opacity ?? 35;
             updateColorControls();
+            updateGuidePreview();
             setupPattern(project.width, project.height);
             originalImage.removeAttribute("src");
             originalImage.style.display = "none";
             generateBtn.disabled = true;
             showView("editor");
             status.textContent = "Editable pattern project opened.";
+
+            if (guideImageDataUrl) {
+                guideImage = new Image();
+                guideImage.onload = function() {
+                    if (generatedDimensions) drawGuideImage(generatedDimensions.width, generatedDimensions.height);
+                    updateGuidePreview();
+                };
+                guideImage.onerror = function() {
+                    guideImage = null;
+                    updateGuidePreview();
+                    status.textContent = "Pattern opened, but its saved guide image could not be loaded.";
+                };
+                guideImage.src = guideImageDataUrl;
+            }
         } catch (error) {
             status.textContent = `Could not open pattern project: ${error.message}`;
         }
@@ -273,6 +340,8 @@ imageInput.addEventListener("change", function(event) {
 
         image.onload = function() {
             uploadedImage = image;
+            guideImage = image;
+            guideImageDataUrl = null;
             stitchColors = null;
             generatedDimensions = null;
             patternEdited = false;
@@ -281,6 +350,8 @@ imageInput.addEventListener("change", function(event) {
             originalImage.style.display = "block";
             generateBtn.disabled = false;
             currentRow = 1;
+            showGuideImageInput.checked = false;
+            updateGuidePreview();
             gridCanvas.hidden = true;
             gridPlaceholder.hidden = false;
             enlargeBtn.disabled = true;
@@ -337,6 +408,10 @@ for (const control of [brightnessInput, contrastInput, saturationInput, threshol
 }
 
 twoColorInput.addEventListener("change", updateColorControls);
+
+showGuideImageInput.addEventListener("change", updateGuidePreview);
+guidePositionInput.addEventListener("change", updateGuidePreview);
+guideOpacityInput.addEventListener("input", updateGuidePreview);
 
 patternTab.addEventListener("click", function() {
     showView("pattern");

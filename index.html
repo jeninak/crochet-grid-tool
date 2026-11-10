@@ -123,9 +123,28 @@
                 <button id="undoEditBtn" type="button" disabled>Undo last stroke</button>
                 <p>Click or drag over stitches to recolor them. Choose white to erase a stitch.</p>
             </div>
+            <div class="guide-controls">
+                <label class="guide-toggle" for="showGuideImage">
+                    <input id="showGuideImage" type="checkbox">
+                    Show original image guide
+                </label>
+                <label for="guidePosition">
+                    Guide position
+                    <select id="guidePosition">
+                        <option value="above">On top of stitches</option>
+                        <option value="under">Under stitches</option>
+                    </select>
+                </label>
+                <label class="guide-opacity-control" for="guideOpacity">
+                    Guide opacity <output id="guideOpacityValue">35%</output>
+                    <input id="guideOpacity" type="range" min="0" max="100" value="35">
+                </label>
+                <span id="guideAvailability">The original image is available as a visual guide.</span>
+            </div>
             <div id="editorGridContainer">
                 <div class="editor-canvas-stack">
                     <canvas id="editorCanvas" aria-label="Editable crochet stitch pattern"></canvas>
+                    <canvas id="editorGuideCanvas" aria-hidden="true" hidden></canvas>
                     <canvas id="editorGridCanvas" aria-hidden="true"></canvas>
                 </div>
             </div>

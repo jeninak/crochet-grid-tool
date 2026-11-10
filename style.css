@@ -425,6 +425,67 @@ button:disabled {
     padding: clamp(20px, 3vw, 32px);
 }
 
+.guide-controls {
+    display: grid;
+    grid-template-columns: auto minmax(180px, 1fr) minmax(180px, 1fr);
+    gap: 14px 20px;
+    align-items: center;
+    margin-bottom: 16px;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fafbf8;
+}
+
+.guide-controls label {
+    color: #59665e;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.guide-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    white-space: nowrap;
+}
+
+.guide-controls select {
+    display: block;
+    width: 100%;
+    margin-top: 5px;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: white;
+    color: var(--ink);
+    font: inherit;
+}
+
+.guide-opacity-control {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 5px 10px;
+    align-items: center;
+}
+
+.guide-opacity-control input {
+    grid-column: 1 / -1;
+    width: 100%;
+}
+
+.guide-opacity-control output {
+    color: var(--green);
+    font-variant-numeric: tabular-nums;
+    font-weight: 650;
+}
+
+#guideAvailability {
+    grid-column: 1 / -1;
+    color: var(--muted);
+    font-size: 0.84rem;
+}
+
 .editor-toolbar {
     display: flex;
     flex-wrap: wrap;
@@ -502,13 +563,100 @@ button:disabled {
     display: block;
     cursor: crosshair;
     touch-action: none;
+    position: relative;
+    z-index: 1;
+    transition: opacity 120ms ease;
+}
+
+#editorGuideCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 2;
+    pointer-events: none;
 }
 
 #editorGridCanvas {
     position: absolute;
     top: 0;
     left: 0;
+    z-index: 3;
     pointer-events: none;
+}
+
+.editor-canvas-stack[data-guide-position="under"] #editorGuideCanvas {
+    z-index: 0;
+}
+
+.editor-canvas-stack[data-guide-position="under"] #editorCanvas {
+    z-index: 1;
+}
+
+.editor-canvas-stack[data-guide-position="under"] #editorGridCanvas {
+    z-index: 2;
+}
+
+.editor-mode header {
+    padding: 16px 24px;
+}
+
+.editor-mode header h1 {
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+}
+
+.editor-mode header p {
+    margin-top: 4px;
+    font-size: 0.9rem;
+}
+
+.editor-mode main {
+    display: flex;
+    width: 100%;
+    max-width: none;
+    min-height: calc(100vh - 106px);
+    flex-direction: column;
+    margin: 0 auto;
+    padding: 12px 20px 16px;
+}
+
+.editor-mode .workspace-tabs {
+    margin-bottom: 10px;
+}
+
+.editor-mode .project-file-controls {
+    margin-bottom: 8px;
+}
+
+.editor-mode #status {
+    margin: 2px 0 8px;
+}
+
+.editor-mode .editor-workspace {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+    padding: 16px 20px;
+}
+
+.editor-mode .editor-workspace .workspace-heading {
+    margin-bottom: 10px;
+}
+
+.editor-mode .editor-toolbar,
+.editor-mode .guide-controls {
+    margin-bottom: 10px;
+    padding: 10px 14px;
+}
+
+.editor-mode .editor-toolbar > p {
+    flex-basis: auto;
+}
+
+.editor-mode #editorGridContainer {
+    min-height: 0;
+    max-height: none;
+    flex: 1;
 }
 
 .workspace-heading {
@@ -722,6 +870,20 @@ dialog::backdrop {
         flex-direction: column;
     }
 
+    .guide-controls {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .guide-toggle,
+    #guideAvailability {
+        grid-column: 1 / -1;
+    }
+
+    .editor-mode main {
+        padding-right: 12px;
+        padding-left: 12px;
+    }
+
     #currentRowStatus {
         width: 100%;
         margin-left: 0;
@@ -779,6 +941,23 @@ dialog::backdrop {
         justify-content: center;
         width: 100%;
         order: -1;
+    }
+
+    .guide-controls {
+        grid-template-columns: 1fr;
+    }
+
+    .guide-toggle,
+    #guideAvailability {
+        grid-column: auto;
+    }
+
+    .editor-mode header {
+        padding: 14px 16px;
+    }
+
+    .editor-mode .editor-workspace {
+        padding: 14px;
     }
 }
 
