@@ -6,6 +6,17 @@ const generateBtn = document.getElementById("generateBtn");
 const gridCanvas = document.getElementById("gridCanvas");
 const gridPlaceholder = document.getElementById("gridPlaceholder");
 const status = document.getElementById("status");
+const patternTab = document.getElementById("patternTab");
+const crochetTab = document.getElementById("crochetTab");
+const patternView = document.getElementById("patternView");
+const crochetWorkspace = document.getElementById("crochetWorkspace");
+const workspaceCanvas = document.getElementById("workspaceCanvas");
+const rowHighlightCanvas = document.getElementById("rowHighlightCanvas");
+const currentRowInput = document.getElementById("currentRowInput");
+const currentRowStatus = document.getElementById("currentRowStatus");
+const previousRowBtn = document.getElementById("previousRowBtn");
+const nextRowBtn = document.getElementById("nextRowBtn");
+const workspaceDimensions = document.getElementById("workspaceDimensions");
 const brightnessInput = document.getElementById("brightness");
 const contrastInput = document.getElementById("contrast");
 const saturationInput = document.getElementById("saturation");
@@ -19,9 +30,18 @@ const largePreviewDialog = document.getElementById("largePreviewDialog");
 const largeGridCanvas = document.getElementById("largeGridCanvas");
 
 const largeCtx = largeGridCanvas.getContext("2d");
+const workspaceCtx = workspaceCanvas.getContext("2d");
 
 let uploadedImage = null;
 let generatedDimensions = null;
+let currentRow = 1;
+
+function showView(showWorkspace) {
+    patternView.hidden = showWorkspace;
+    crochetWorkspace.hidden = !showWorkspace;
+    patternTab.setAttribute("aria-selected", String(!showWorkspace));
+    crochetTab.setAttribute("aria-selected", String(showWorkspace));
+}
 
 function renderGrid(width, height) {
     const sourceCanvas = document.createElement("canvas");
@@ -48,14 +68,47 @@ function renderGrid(width, height) {
         CrochetImageProcessing.applyTwoColor(adjustedImage, Number(thresholdInput.value));
     }
 
-    CrochetGridRenderer.draw(adjustedImage, width, height, gridCanvas);
+    CrochetGridRenderer.draw(adjustedImage, width, height, gridCanvas, twoColorInput.checked);
 
     gridCanvas.hidden = false;
     gridPlaceholder.hidden = true;
     generatedDimensions = { width, height };
     enlargeBtn.disabled = false;
     downloadBtn.disabled = false;
+    crochetTab.disabled = false;
+    workspaceDimensions.textContent = `${width} stitches wide · ${height} rows`;
+    currentRowInput.max = height;
+    currentRow = Math.min(currentRow, height);
+    currentRowInput.disabled = false;
+    previousRowBtn.disabled = false;
+    nextRowBtn.disabled = false;
+    workspaceCanvas.width = gridCanvas.width;
+    workspaceCanvas.height = gridCanvas.height;
+    workspaceCtx.drawImage(gridCanvas, 0, 0);
+    updateWorkspaceRow();
     status.textContent = `Grid generated successfully! ${width} × ${height} stitches.`;
+}
+
+function updateWorkspaceRow() {
+    if (!generatedDimensions) return;
+
+    currentRowInput.value = currentRow;
+    currentRowStatus.textContent = `Row ${currentRow} of ${generatedDimensions.height}`;
+    previousRowBtn.disabled = currentRow <= 1;
+    nextRowBtn.disabled = currentRow >= generatedDimensions.height;
+    CrochetGridRenderer.highlightRow(
+        rowHighlightCanvas,
+        generatedDimensions.width,
+        generatedDimensions.height,
+        currentRow - 1
+    );
+}
+
+function setCurrentRow(row) {
+    if (!generatedDimensions || !Number.isInteger(row)) return;
+
+    currentRow = Math.max(1, Math.min(generatedDimensions.height, row));
+    updateWorkspaceRow();
 }
 
 function updateColorControls() {
@@ -92,10 +145,18 @@ imageInput.addEventListener("change", function(event) {
             originalImage.style.display = "block";
             generateBtn.disabled = false;
             generatedDimensions = null;
+            currentRow = 1;
             gridCanvas.hidden = true;
             gridPlaceholder.hidden = false;
             enlargeBtn.disabled = true;
             downloadBtn.disabled = true;
+            crochetTab.disabled = true;
+            currentRowInput.disabled = true;
+            previousRowBtn.disabled = true;
+            nextRowBtn.disabled = true;
+            currentRowStatus.textContent = "Generate a pattern to start tracking rows.";
+            workspaceDimensions.textContent = "";
+            showView(false);
             status.textContent = "Image uploaded successfully!";
         };
 
@@ -128,6 +189,7 @@ generateBtn.addEventListener("click", function() {
     }
 
     status.textContent = "Generating crochet grid...";
+    currentRow = 1;
     renderGrid(gridWidth, gridHeight);
 });
 
@@ -136,6 +198,27 @@ for (const control of [brightnessInput, contrastInput, saturationInput, threshol
 }
 
 twoColorInput.addEventListener("change", updateColorControls);
+
+patternTab.addEventListener("click", function() {
+    showView(false);
+});
+
+crochetTab.addEventListener("click", function() {
+    if (!crochetTab.disabled) showView(true);
+});
+
+previousRowBtn.addEventListener("click", function() {
+    setCurrentRow(currentRow - 1);
+});
+
+nextRowBtn.addEventListener("click", function() {
+    setCurrentRow(currentRow + 1);
+});
+
+currentRowInput.addEventListener("change", function() {
+    const row = Number(currentRowInput.value);
+    setCurrentRow(row);
+});
 
 enlargeBtn.addEventListener("click", function() {
     largeGridCanvas.width = gridCanvas.width;

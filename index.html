@@ -15,73 +15,110 @@
     </header>
 
     <main>
-        <section class="settings">
-            <h2>1. Upload your image</h2>
-
-            <input type="file" id="imageInput" accept="image/png, image/jpeg, image/webp">
-
-            <h2>2. Grid dimensions</h2>
-
-            <div class="dimension-inputs">
-                <label>
-                    Width (stitches)
-                    <input type="number" id="gridWidth" value="150" min="1" max="300">
-                </label>
-
-                <label>
-                    Height (stitches)
-                    <input type="number" id="gridHeight" value="180" min="1" max="300">
-                </label>
-            </div>
-
-            <h2>3. Adjust pattern colors</h2>
-            <div class="color-mode-control">
-                <label>
-                    <input type="checkbox" id="twoColorMode">
-                    Use two colors (white and dark grey)
-                </label>
-            </div>
-            <div class="threshold-control" id="thresholdControl" hidden>
-                <label for="darkThreshold">Darkness threshold <output id="darkThresholdValue">128</output></label>
-                <input type="range" id="darkThreshold" min="0" max="255" value="128">
-            </div>
-            <div class="color-controls">
-                <label>
-                    Brightness <output id="brightnessValue">100%</output>
-                    <input type="range" id="brightness" min="0" max="200" value="100">
-                </label>
-                <label>
-                    Contrast <output id="contrastValue">100%</output>
-                    <input type="range" id="contrast" min="0" max="200" value="100">
-                </label>
-                <label>
-                    Saturation <output id="saturationValue">100%</output>
-                    <input type="range" id="saturation" min="0" max="200" value="100">
-                </label>
-            </div>
-
-            <button id="generateBtn" disabled>
-                Generate crochet grid
+        <nav class="workspace-tabs" role="tablist" aria-label="Pattern workflow">
+            <button id="patternTab" type="button" role="tab" aria-selected="true" aria-controls="patternView">
+                Pattern setup
             </button>
+            <button id="crochetTab" type="button" role="tab" aria-selected="false" aria-controls="crochetWorkspace" disabled>
+                Crochet workspace
+            </button>
+        </nav>
 
-            <p id="status"></p>
-        </section>
+        <div id="patternView" role="tabpanel" aria-labelledby="patternTab">
+            <section class="settings">
+                <h2>1. Upload your image</h2>
 
-        <section class="preview">
-            <div class="preview-panel">
-                <h2>Original image</h2>
-                <img id="originalImage" alt="Uploaded image preview">
-            </div>
+                <input type="file" id="imageInput" accept="image/png, image/jpeg, image/webp">
 
-            <div class="preview-panel">
-                <h2>Crochet grid</h2>
-                <div id="gridContainer">
-                    <p id="gridPlaceholder">Your generated grid will appear here.</p>
-                    <canvas id="gridCanvas" hidden></canvas>
+                <h2>2. Grid dimensions</h2>
+
+                <div class="dimension-inputs">
+                    <label>
+                        Width (stitches)
+                        <input type="number" id="gridWidth" value="150" min="1" max="300">
+                    </label>
+
+                    <label>
+                        Height (stitches)
+                        <input type="number" id="gridHeight" value="180" min="1" max="300">
+                    </label>
                 </div>
-                <div class="pattern-actions">
-                    <button id="enlargeBtn" disabled>Preview larger</button>
-                    <button id="downloadBtn" disabled>Download PNG</button>
+
+                <h2>3. Adjust pattern colors</h2>
+                <div class="color-mode-control">
+                    <label>
+                        <input type="checkbox" id="twoColorMode">
+                        Use two colors (white and dark grey)
+                    </label>
+                </div>
+                <div class="threshold-control" id="thresholdControl" hidden>
+                    <label for="darkThreshold">Darkness threshold <output id="darkThresholdValue">128</output></label>
+                    <input type="range" id="darkThreshold" min="0" max="255" value="128">
+                </div>
+                <div class="color-controls">
+                    <label>
+                        Brightness <output id="brightnessValue">100%</output>
+                        <input type="range" id="brightness" min="0" max="200" value="100">
+                    </label>
+                    <label>
+                        Contrast <output id="contrastValue">100%</output>
+                        <input type="range" id="contrast" min="0" max="200" value="100">
+                    </label>
+                    <label>
+                        Saturation <output id="saturationValue">100%</output>
+                        <input type="range" id="saturation" min="0" max="200" value="100">
+                    </label>
+                </div>
+
+                <button id="generateBtn" disabled>
+                    Generate crochet grid
+                </button>
+
+                <p id="status"></p>
+            </section>
+
+            <section class="preview">
+                <div class="preview-panel">
+                    <h2>Original image</h2>
+                    <img id="originalImage" alt="Uploaded image preview">
+                </div>
+
+                <div class="preview-panel">
+                    <h2>Crochet grid</h2>
+                    <div id="gridContainer">
+                        <p id="gridPlaceholder">Your generated grid will appear here.</p>
+                        <canvas id="gridCanvas" hidden></canvas>
+                    </div>
+                    <div class="pattern-actions">
+                        <button id="enlargeBtn" disabled>Preview larger</button>
+                        <button id="downloadBtn" disabled>Download PNG</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <section id="crochetWorkspace" class="crochet-workspace" role="tabpanel" aria-labelledby="crochetTab" hidden>
+            <div class="workspace-heading">
+                <div>
+                    <p class="workspace-eyebrow">Crocheting phase</p>
+                    <h2>Your active pattern</h2>
+                </div>
+                <p id="workspaceDimensions" class="workspace-dimensions"></p>
+            </div>
+            <div class="row-controls">
+                <button id="previousRowBtn" type="button" disabled>Previous row</button>
+                <label for="currentRowInput">
+                    Working row
+                    <input id="currentRowInput" type="number" min="1" value="1" disabled>
+                </label>
+                <button id="nextRowBtn" type="button" disabled>Next row</button>
+                <p id="currentRowStatus" aria-live="polite">Generate a pattern to start tracking rows.</p>
+            </div>
+            <p class="row-help">Rows are counted from top to bottom. The highlighted row is for tracking only and is not included in downloads.</p>
+            <div id="workspaceGridContainer">
+                <div class="workspace-canvas-stack">
+                    <canvas id="workspaceCanvas" aria-label="Crochet pattern in workspace"></canvas>
+                    <canvas id="rowHighlightCanvas" aria-hidden="true"></canvas>
                 </div>
             </div>
         </section>

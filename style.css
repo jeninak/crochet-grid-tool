@@ -19,6 +19,10 @@
     box-sizing: border-box;
 }
 
+[hidden] {
+    display: none !important;
+}
+
 body {
     min-width: 320px;
     min-height: 100vh;
@@ -85,8 +89,44 @@ main {
     padding: 0 24px;
 }
 
+.workspace-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding: 6px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: rgb(255 254 250 / 75%);
+    width: fit-content;
+}
+
+.workspace-tabs button {
+    padding: 10px 16px;
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+}
+
+.workspace-tabs button[aria-selected="true"] {
+    background: var(--green);
+    color: white;
+}
+
+.workspace-tabs button:not(:disabled):not([aria-selected="true"]):hover {
+    background: var(--soft-green);
+    color: var(--green-dark);
+    box-shadow: none;
+    transform: none;
+}
+
+.workspace-tabs button:disabled {
+    background: transparent;
+    color: #a7afa8;
+}
+
 .settings,
-.preview-panel {
+.preview-panel,
+.crochet-workspace {
     border: 1px solid rgb(55 72 60 / 6%);
     border-radius: 18px;
     background: var(--paper);
@@ -330,6 +370,106 @@ button:disabled {
     font-weight: 500;
 }
 
+.crochet-workspace {
+    padding: clamp(20px, 3vw, 32px);
+}
+
+.workspace-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 18px;
+    margin-bottom: 20px;
+}
+
+.workspace-heading h2 {
+    margin: 0;
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 1.65rem;
+    font-weight: 500;
+}
+
+.workspace-eyebrow {
+    margin: 0 0 4px;
+    color: var(--clay);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+}
+
+.workspace-dimensions {
+    margin: 0;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.row-controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    padding: 16px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fafbf8;
+}
+
+.row-controls label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: #59665e;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.row-controls input[type="number"] {
+    width: 90px;
+}
+
+#currentRowStatus {
+    margin: 0 0 0 auto;
+    color: var(--green);
+    font-weight: 650;
+    font-variant-numeric: tabular-nums;
+}
+
+.row-help {
+    margin: 12px 2px 16px;
+    color: var(--muted);
+    font-size: 0.88rem;
+}
+
+#workspaceGridContainer {
+    max-height: min(72vh, 900px);
+    min-height: 280px;
+    overflow: auto;
+    border: 1px solid #eeede6;
+    border-radius: 12px;
+    background-color: #fafaf6;
+    background-image: linear-gradient(45deg, #f0efe9 25%, transparent 25%), linear-gradient(-45deg, #f0efe9 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0efe9 75%), linear-gradient(-45deg, transparent 75%, #f0efe9 75%);
+    background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+    background-size: 16px 16px;
+}
+
+.workspace-canvas-stack {
+    position: relative;
+    width: max-content;
+    margin: 0 auto;
+}
+
+.workspace-canvas-stack canvas {
+    display: block;
+}
+
+#rowHighlightCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    pointer-events: none;
+}
+
 #originalImage {
     display: none;
     width: 100%;
@@ -435,6 +575,16 @@ dialog::backdrop {
         grid-template-columns: 1fr;
         gap: 18px;
     }
+
+    .workspace-heading {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    #currentRowStatus {
+        width: 100%;
+        margin-left: 0;
+    }
 }
 
 @media (max-width: 420px) {
@@ -455,6 +605,32 @@ dialog::backdrop {
 
     .pattern-actions button {
         flex: 1 1 auto;
+    }
+
+    .workspace-tabs {
+        width: 100%;
+    }
+
+    .workspace-tabs button {
+        flex: 1;
+        padding: 9px 10px;
+        font-size: 0.86rem;
+    }
+
+    .row-controls {
+        align-items: stretch;
+    }
+
+    .row-controls button {
+        flex: 1;
+        padding: 10px 8px;
+        font-size: 0.84rem;
+    }
+
+    .row-controls label {
+        justify-content: center;
+        width: 100%;
+        order: -1;
     }
 }
 
