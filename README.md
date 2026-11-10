@@ -14,7 +14,7 @@ Crochet Grid Tool turns an image into a stitch-by-stitch chart. Generate a patte
 - Recolor individual stitches in the pixel editor. Click or drag to paint; use white to erase.
 - Undo the most recent paint stroke.
 - Toggle the generated pattern into a mosaic-crochet pattern with alternating yarn rows and dropped-stitch marks.
-- Track the row you are working on in a separate crochet workspace.
+- Track the row you are working on in a separate crochet workspace with a large, scrollable pattern canvas.
 - Save and reopen an editable project containing the stitch colors, dimensions, color settings, and current row.
 
 ## Getting started
@@ -73,7 +73,7 @@ Mosaic mode converts the edited pixels to dark grey and white using the darkness
 
 ### Track crochet progress
 
-Open **Crochet workspace** to follow the chart while crocheting. Use **Previous row**, **Next row**, or the **Working row** field to move the highlight. Rows are numbered from top to bottom.
+Open **Crochet workspace** to follow the chart while crocheting. The pattern canvas uses the same large, scrollable display as the pixel editor; scroll within it to inspect different parts of wide or tall patterns. Use **Previous row**, **Next row**, or the **Working row** field to move the highlight. Rows are numbered from top to bottom.
 
 The row highlight is a temporary guide and is not included in the downloaded PNG.
 

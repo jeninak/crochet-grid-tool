@@ -69,6 +69,7 @@ function showView(view) {
     editorTab.setAttribute("aria-selected", String(view === "editor"));
     crochetTab.setAttribute("aria-selected", String(view === "crochet"));
     document.body.classList.toggle("editor-mode", view === "editor");
+    document.body.classList.toggle("crochet-mode", view === "crochet");
     document.body.classList.toggle("pattern-mode", view === "pattern");
 }
 

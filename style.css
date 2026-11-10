@@ -665,11 +665,19 @@ button:disabled {
     padding: 16px 24px;
 }
 
+.crochet-mode header {
+    padding: 16px 24px;
+}
+
 .pattern-mode header {
     padding: 16px 24px;
 }
 
 .editor-mode header h1 {
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+}
+
+.crochet-mode header h1 {
     font-size: clamp(1.7rem, 3vw, 2.4rem);
 }
 
@@ -682,12 +690,18 @@ button:disabled {
     font-size: 0.9rem;
 }
 
+.crochet-mode header p {
+    margin-top: 4px;
+    font-size: 0.9rem;
+}
+
 .pattern-mode header p {
     margin-top: 4px;
     font-size: 0.9rem;
 }
 
 .editor-mode main,
+.crochet-mode main,
 .pattern-mode main {
     display: flex;
     width: 100%;
@@ -699,16 +713,19 @@ button:disabled {
 }
 
 .editor-mode .workspace-tabs,
+.crochet-mode .workspace-tabs,
 .pattern-mode .workspace-tabs {
     margin-bottom: 10px;
 }
 
 .editor-mode .project-file-controls,
+.crochet-mode .project-file-controls,
 .pattern-mode .project-file-controls {
     margin-bottom: 8px;
 }
 
 .editor-mode #status,
+.crochet-mode #status,
 .pattern-mode #status {
     margin: 2px 0 8px;
 }
@@ -817,6 +834,33 @@ button:disabled {
 
 .editor-mode .editor-toolbar > p {
     flex-basis: auto;
+}
+
+.crochet-mode .crochet-workspace {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+    padding: 16px 20px;
+}
+
+.crochet-mode .crochet-workspace .workspace-heading {
+    margin-bottom: 10px;
+}
+
+.crochet-mode .row-controls {
+    margin-bottom: 8px;
+    padding: 10px 14px;
+}
+
+.crochet-mode .row-help {
+    margin: 4px 2px 10px;
+}
+
+.crochet-mode #workspaceGridContainer {
+    min-height: 0;
+    max-height: none;
+    flex: 1;
 }
 
 .editor-mode #editorGridContainer {
@@ -1045,7 +1089,8 @@ dialog::backdrop {
         grid-column: 1 / -1;
     }
 
-    .editor-mode main {
+    .editor-mode main,
+    .crochet-mode main {
         padding-right: 12px;
         padding-left: 12px;
     }
@@ -1122,7 +1167,15 @@ dialog::backdrop {
         padding: 14px 16px;
     }
 
+    .crochet-mode header {
+        padding: 14px 16px;
+    }
+
     .editor-mode .editor-workspace {
+        padding: 14px;
+    }
+
+    .crochet-mode .crochet-workspace {
         padding: 14px;
     }
 }
