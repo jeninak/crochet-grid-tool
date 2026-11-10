@@ -618,10 +618,40 @@ button:disabled {
     background-size: 16px 16px;
 }
 
+.chart-coordinate-layout {
+    display: grid;
+    width: max-content;
+    grid-template-columns: 38px max-content;
+    grid-template-rows: 24px max-content;
+    grid-template-areas:
+        ". columns"
+        "rows chart";
+    margin: 0 auto;
+}
+
+.column-coordinate-ruler {
+    grid-area: columns;
+}
+
+.row-coordinate-ruler {
+    grid-area: rows;
+}
+
+.column-coordinate-ruler,
+.row-coordinate-ruler {
+    display: block;
+}
+
 .editor-canvas-stack {
     position: relative;
+    grid-area: chart;
     width: max-content;
-    margin: 0 auto;
+    margin: 0;
+}
+
+.pattern-canvas-stack {
+    grid-area: chart;
+    width: max-content;
 }
 
 #editorCanvas {
@@ -962,8 +992,9 @@ button:disabled {
 
 .workspace-canvas-stack {
     position: relative;
+    grid-area: chart;
     width: max-content;
-    margin: 0 auto;
+    margin: 0;
 }
 
 .workspace-canvas-stack canvas {
@@ -1009,6 +1040,10 @@ button:disabled {
 #gridCanvas {
     display: block;
     margin: auto;
+}
+
+.pattern-canvas-stack #gridCanvas {
+    margin: 0;
 }
 
 dialog {

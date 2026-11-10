@@ -64,6 +64,63 @@ window.CrochetGridRenderer = (function() {
         }
     }
 
+    function drawCoordinateRulers(columnCanvas, rowCanvas, width, height, leadingOffset = 0) {
+        const chartWidth = leadingOffset + width * STITCH_SIZE;
+        const chartHeight = height * STITCH_SIZE;
+        const columnContext = columnCanvas.getContext("2d");
+        const rowContext = rowCanvas.getContext("2d");
+
+        columnCanvas.width = chartWidth;
+        columnCanvas.height = 24;
+        rowCanvas.width = 38;
+        rowCanvas.height = chartHeight;
+
+        columnContext.fillStyle = "#f5f4ee";
+        columnContext.fillRect(0, 0, columnCanvas.width, columnCanvas.height);
+        columnContext.strokeStyle = "#8b928a";
+        columnContext.fillStyle = "#4d5b52";
+        columnContext.lineWidth = 1;
+        columnContext.font = "9px Arial, sans-serif";
+        columnContext.textAlign = "center";
+        columnContext.textBaseline = "middle";
+
+        for (let x = 0; x <= width; x++) {
+            const position = leadingOffset + x * STITCH_SIZE + 0.5;
+            columnContext.beginPath();
+            columnContext.moveTo(position, 17);
+            columnContext.lineTo(position, 24);
+            columnContext.stroke();
+        }
+
+        for (let column = 1; column <= width; column++) {
+            if (column !== 1 && column % 10 !== 0) continue;
+            const center = leadingOffset + (column - 0.5) * STITCH_SIZE;
+            columnContext.fillText(String(column), center, 8);
+        }
+
+        rowContext.fillStyle = "#f5f4ee";
+        rowContext.fillRect(0, 0, rowCanvas.width, rowCanvas.height);
+        rowContext.strokeStyle = "#8b928a";
+        rowContext.fillStyle = "#4d5b52";
+        rowContext.lineWidth = 1;
+        rowContext.font = "9px Arial, sans-serif";
+        rowContext.textAlign = "right";
+        rowContext.textBaseline = "middle";
+
+        for (let y = 0; y <= height; y++) {
+            const position = y * STITCH_SIZE + 0.5;
+            rowContext.beginPath();
+            rowContext.moveTo(31, position);
+            rowContext.lineTo(38, position);
+            rowContext.stroke();
+        }
+
+        for (let row = 1; row <= height; row++) {
+            if (row !== 1 && row % 10 !== 0) continue;
+            rowContext.fillText(String(row), 28, (row - 0.5) * STITCH_SIZE);
+        }
+    }
+
     function drawGridLines(context, width, height, twoColor) {
         const minorColor = twoColor ? "#b6b6ae" : "#999999";
         const majorColor = twoColor ? "#85857e" : "#333333";
@@ -109,5 +166,13 @@ window.CrochetGridRenderer = (function() {
         context.strokeRect(1, top + 1, canvas.width - 2, STITCH_SIZE - 2);
     }
 
-    return { stitchSize: STITCH_SIZE, draw, drawColors, drawGridOverlay, drawRuleOverlay, highlightRow };
+    return {
+        stitchSize: STITCH_SIZE,
+        draw,
+        drawColors,
+        drawGridOverlay,
+        drawRuleOverlay,
+        drawCoordinateRulers,
+        highlightRow
+    };
 })();

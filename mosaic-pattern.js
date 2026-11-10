@@ -34,7 +34,14 @@ window.CrochetMosaicPattern = (function() {
             }
         }
 
-        return { width: chartWidth, height: chartHeight, sourceWidth: width, sourceHeight: height, rows };
+        return {
+            width: chartWidth,
+            height: chartHeight,
+            sourceWidth: width,
+            sourceHeight: height,
+            labelWidth: LABEL_WIDTH,
+            rows
+        };
     }
 
     function draw(chart, canvas) {

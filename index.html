@@ -81,7 +81,13 @@
                     </p>
                     <div id="gridContainer">
                         <p id="gridPlaceholder">Your generated grid will appear here.</p>
-                        <canvas id="gridCanvas" hidden></canvas>
+                        <div id="gridRulerLayout" class="chart-coordinate-layout" hidden>
+                            <canvas id="gridColumnRuler" class="column-coordinate-ruler" aria-hidden="true"></canvas>
+                            <canvas id="gridRowRuler" class="row-coordinate-ruler" aria-hidden="true"></canvas>
+                            <div class="pattern-canvas-stack">
+                                <canvas id="gridCanvas" hidden></canvas>
+                            </div>
+                        </div>
                     </div>
                     <div class="pattern-actions">
                         <button id="enlargeBtn" disabled>Preview larger</button>
@@ -156,11 +162,15 @@
                 <span id="guideAvailability">The original image is available as a visual guide.</span>
             </div>
             <div id="editorGridContainer">
-                <div class="editor-canvas-stack">
-                    <canvas id="editorCanvas" aria-label="Editable crochet stitch pattern"></canvas>
-                    <canvas id="editorGuideCanvas" aria-hidden="true" hidden></canvas>
-                    <canvas id="editorGridCanvas" aria-hidden="true"></canvas>
-                    <canvas id="editorRuleCanvas" aria-hidden="true"></canvas>
+                <div class="chart-coordinate-layout">
+                    <canvas id="editorColumnRuler" class="column-coordinate-ruler" aria-hidden="true"></canvas>
+                    <canvas id="editorRowRuler" class="row-coordinate-ruler" aria-hidden="true"></canvas>
+                    <div class="editor-canvas-stack">
+                        <canvas id="editorCanvas" aria-label="Editable crochet stitch pattern"></canvas>
+                        <canvas id="editorGuideCanvas" aria-hidden="true" hidden></canvas>
+                        <canvas id="editorGridCanvas" aria-hidden="true"></canvas>
+                        <canvas id="editorRuleCanvas" aria-hidden="true"></canvas>
+                    </div>
                 </div>
             </div>
         </section>
@@ -184,9 +194,13 @@
             </div>
             <p class="row-help">Rows are counted from top to bottom. The highlighted row is for tracking only and is not included in downloads.</p>
             <div id="workspaceGridContainer">
-                <div class="workspace-canvas-stack">
-                    <canvas id="workspaceCanvas" aria-label="Crochet pattern in workspace"></canvas>
-                    <canvas id="rowHighlightCanvas" aria-hidden="true"></canvas>
+                <div class="chart-coordinate-layout">
+                    <canvas id="workspaceColumnRuler" class="column-coordinate-ruler" aria-hidden="true"></canvas>
+                    <canvas id="workspaceRowRuler" class="row-coordinate-ruler" aria-hidden="true"></canvas>
+                    <div class="workspace-canvas-stack">
+                        <canvas id="workspaceCanvas" aria-label="Crochet pattern in workspace"></canvas>
+                        <canvas id="rowHighlightCanvas" aria-hidden="true"></canvas>
+                    </div>
                 </div>
             </div>
         </section>

@@ -5,6 +5,9 @@ const gridHeightInput = document.getElementById("gridHeight");
 const generateBtn = document.getElementById("generateBtn");
 const gridCanvas = document.getElementById("gridCanvas");
 const gridContainer = document.getElementById("gridContainer");
+const gridRulerLayout = document.getElementById("gridRulerLayout");
+const gridColumnRuler = document.getElementById("gridColumnRuler");
+const gridRowRuler = document.getElementById("gridRowRuler");
 const gridPlaceholder = document.getElementById("gridPlaceholder");
 const status = document.getElementById("status");
 const patternTab = document.getElementById("patternTab");
@@ -19,6 +22,8 @@ const editorCanvas = document.getElementById("editorCanvas");
 const editorGridCanvas = document.getElementById("editorGridCanvas");
 const editorGuideCanvas = document.getElementById("editorGuideCanvas");
 const editorRuleCanvas = document.getElementById("editorRuleCanvas");
+const editorColumnRuler = document.getElementById("editorColumnRuler");
+const editorRowRuler = document.getElementById("editorRowRuler");
 const stitchColorInput = document.getElementById("stitchColor");
 const undoEditBtn = document.getElementById("undoEditBtn");
 const mosaicModeInput = document.getElementById("mosaicMode");
@@ -31,6 +36,8 @@ const guideOpacityValue = document.getElementById("guideOpacityValue");
 const guideAvailability = document.getElementById("guideAvailability");
 const workspaceCanvas = document.getElementById("workspaceCanvas");
 const rowHighlightCanvas = document.getElementById("rowHighlightCanvas");
+const workspaceColumnRuler = document.getElementById("workspaceColumnRuler");
+const workspaceRowRuler = document.getElementById("workspaceRowRuler");
 const currentRowInput = document.getElementById("currentRowInput");
 const currentRowStatus = document.getElementById("currentRowStatus");
 const previousRowBtn = document.getElementById("previousRowBtn");
@@ -191,6 +198,7 @@ function setupPattern(width, height) {
     renderPatternCanvases();
 
     gridCanvas.hidden = false;
+    gridRulerLayout.hidden = false;
     gridPlaceholder.hidden = true;
     enlargeBtn.disabled = false;
     downloadBtn.disabled = false;
@@ -227,6 +235,12 @@ function renderPatternCanvases() {
         width,
         height
     );
+    CrochetGridRenderer.drawCoordinateRulers(
+        editorColumnRuler,
+        editorRowRuler,
+        width,
+        height
+    );
     if (guideImage) {
         drawGuideImage(width, height);
     }
@@ -238,6 +252,21 @@ function renderPatternCanvases() {
         currentRowInput.max = height;
         currentRow = Math.min(currentRow, height);
     }
+    const chart = mosaicEnabled ? mosaicPatternData : { width, height, labelWidth: 0 };
+    CrochetGridRenderer.drawCoordinateRulers(
+        gridColumnRuler,
+        gridRowRuler,
+        chart.width,
+        chart.height,
+        chart.labelWidth
+    );
+    CrochetGridRenderer.drawCoordinateRulers(
+        workspaceColumnRuler,
+        workspaceRowRuler,
+        chart.width,
+        chart.height,
+        chart.labelWidth
+    );
     mosaicModeDescription.hidden = !mosaicEnabled;
     updateGuidePreview();
     updateWorkspaceRow();
@@ -483,6 +512,7 @@ imageInput.addEventListener("change", function(event) {
             mosaicModeDescription.hidden = true;
             updateGuidePreview();
             gridCanvas.hidden = true;
+            gridRulerLayout.hidden = true;
             gridContainer.classList.remove("has-pattern");
             gridPlaceholder.hidden = false;
             enlargeBtn.disabled = true;

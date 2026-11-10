@@ -10,6 +10,7 @@ Crochet Grid Tool turns an image into a stitch-by-stitch chart. Generate a patte
 - Adjust brightness, contrast, saturation, and two-color settings from the pixel editor.
 - Optionally simplify the image to white and dark grey, with an adjustable darkness threshold.
 - View generated charts in an expanded, scrollable preview.
+- Read row and column coordinates in the pattern setup, pixel editor, and crochet workspace; ruler ticks mark each stitch, with labels at stitch 1 and every 10 stitches.
 - Preview the chart at a larger size and download it as a PNG.
 - Recolor individual stitches in the pixel editor. Click or drag to paint; use white to erase.
 - Undo the most recent paint stroke.
@@ -73,7 +74,7 @@ Mosaic mode converts the edited pixels to dark grey and white using the darkness
 
 ### Track crochet progress
 
-Open **Crochet workspace** to follow the chart while crocheting. The pattern canvas uses the same large, scrollable display as the pixel editor; scroll within it to inspect different parts of wide or tall patterns. Use **Previous row**, **Next row**, or the **Working row** field to move the highlight. Rows are numbered from top to bottom.
+Open **Crochet workspace** to follow the chart while crocheting. The pattern canvas uses the same large, scrollable display as the pixel editor; scroll within it to inspect different parts of wide or tall patterns. Use the coordinate rulers to locate stitches: columns count left to right and rows top to bottom, both starting at 1. Every stitch has a tick, with numbers at stitch 1 and each 10th stitch. Use **Previous row**, **Next row**, or the **Working row** field to move the highlight.
 
 The row highlight is a temporary guide and is not included in the downloaded PNG.
 
@@ -91,7 +92,7 @@ Use the PNG download for viewing or printing. Use the JSON project to continue e
 - `style.css` — layout and visual styling.
 - `script.js` — application behavior and coordination.
 - `image-processing.js` — image color adjustments and two-color conversion.
-- `grid-renderer.js` — stitch grid, grid lines, and row highlight rendering.
+- `grid-renderer.js` — stitch grids, grid lines, coordinate rulers, and row highlights.
 - `stitch-pattern-rules.js` — detects and corrects vertically stacked same-color stitches.
 - `pixel-editor.js` — stitch painting and undo behavior.
 - `pattern-project.js` — editable project serialization and validation.
