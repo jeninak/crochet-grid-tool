@@ -87,6 +87,29 @@ const pixelEditor = CrochetPixelEditor.create(
     }
 );
 
+document.addEventListener("keydown", function(event) {
+    if (
+        (!event.ctrlKey && !event.metaKey) ||
+        event.altKey ||
+        event.key.toLowerCase() !== "z" ||
+        editorWorkspace.hidden ||
+        undoEditBtn.disabled
+    ) {
+        return;
+    }
+
+    const target = event.target;
+    if (
+        target instanceof Element &&
+        (target.matches("input, textarea, select") || target.isContentEditable)
+    ) {
+        return;
+    }
+
+    event.preventDefault();
+    pixelEditor.undo();
+});
+
 function samplePattern(width, height) {
     const sourceCanvas = document.createElement("canvas");
     sourceCanvas.width = width;

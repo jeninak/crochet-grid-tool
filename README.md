@@ -59,7 +59,7 @@ Example input and generated chart:
 2. Open **Pixel editor**.
 3. Choose a color using the color picker, or select the dark-grey or white swatch.
 4. Click or drag across stitches to apply the selected color. White can be used to replace a stitch with the background color.
-5. Select **Undo last stroke** to revert the most recent click or drag.
+5. Select **Undo last stroke** or press **Ctrl+Z** to revert the most recent click or drag. On macOS, use **Command+Z**. The shortcut is active in the pixel editor and does not override undo in text fields.
 
 Edits update the pattern and crochet workspace. Generating the pattern again from the source image replaces existing stitch edits.
 
