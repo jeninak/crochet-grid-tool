@@ -44,6 +44,26 @@ window.CrochetGridRenderer = (function() {
         drawGridLines(canvas.getContext("2d"), width, height, twoColor);
     }
 
+    function drawRuleOverlay(canvas, spots, width, height) {
+        canvas.width = width * STITCH_SIZE;
+        canvas.height = height * STITCH_SIZE;
+        if (spots.length === 0) return;
+
+        const context = canvas.getContext("2d");
+        context.fillStyle = "rgba(220, 38, 38, 0.38)";
+        context.strokeStyle = "#dc2626";
+        context.lineWidth = 2;
+
+        for (const spot of spots) {
+            for (const index of spot.indices) {
+                const x = (index % width) * STITCH_SIZE;
+                const y = Math.floor(index / width) * STITCH_SIZE;
+                context.fillRect(x, y, STITCH_SIZE, STITCH_SIZE);
+                context.strokeRect(x + 1, y + 1, STITCH_SIZE - 2, STITCH_SIZE - 2);
+            }
+        }
+    }
+
     function drawGridLines(context, width, height, twoColor) {
         const minorColor = twoColor ? "#b6b6ae" : "#999999";
         const majorColor = twoColor ? "#85857e" : "#333333";
@@ -89,5 +109,5 @@ window.CrochetGridRenderer = (function() {
         context.strokeRect(1, top + 1, canvas.width - 2, STITCH_SIZE - 2);
     }
 
-    return { stitchSize: STITCH_SIZE, draw, drawColors, drawGridOverlay, highlightRow };
+    return { stitchSize: STITCH_SIZE, draw, drawColors, drawGridOverlay, drawRuleOverlay, highlightRow };
 })();

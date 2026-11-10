@@ -18,6 +18,7 @@ const saveProjectBtn = document.getElementById("saveProjectBtn");
 const editorCanvas = document.getElementById("editorCanvas");
 const editorGridCanvas = document.getElementById("editorGridCanvas");
 const editorGuideCanvas = document.getElementById("editorGuideCanvas");
+const editorRuleCanvas = document.getElementById("editorRuleCanvas");
 const stitchColorInput = document.getElementById("stitchColor");
 const undoEditBtn = document.getElementById("undoEditBtn");
 const mosaicModeInput = document.getElementById("mosaicMode");
@@ -220,6 +221,12 @@ function renderPatternCanvases() {
     CrochetGridRenderer.drawColors(stitchColors, width, height, workspaceCanvas, twoColorPattern);
     CrochetGridRenderer.drawColors(stitchColors, width, height, editorCanvas, false, false);
     CrochetGridRenderer.drawGridOverlay(editorGridCanvas, width, height, twoColorPattern);
+    CrochetGridRenderer.drawRuleOverlay(
+        editorRuleCanvas,
+        CrochetStitchPatternRules.findTwoRowTallSpots(stitchColors, width, height),
+        width,
+        height
+    );
     if (guideImage) {
         drawGuideImage(width, height);
     }

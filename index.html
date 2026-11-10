@@ -135,7 +135,7 @@
                 <button id="darkGreySwatch" type="button" class="color-swatch" aria-label="Select dark grey" title="Dark grey"></button>
                 <button id="whiteSwatch" type="button" class="color-swatch" aria-label="Select white" title="White"></button>
                 <button id="undoEditBtn" type="button" disabled>Undo last stroke (Ctrl+Z)</button>
-                <p>Click or drag over stitches to recolor them. Choose white to erase a stitch.</p>
+                <p>Click or drag over stitches to recolor them. Choose white to erase a stitch. Red highlights mark forbidden two-stitch vertical runs; they do not change the pattern.</p>
             </div>
             <div class="guide-controls">
                 <label class="guide-toggle" for="showGuideImage">
@@ -160,6 +160,7 @@
                     <canvas id="editorCanvas" aria-label="Editable crochet stitch pattern"></canvas>
                     <canvas id="editorGuideCanvas" aria-hidden="true" hidden></canvas>
                     <canvas id="editorGridCanvas" aria-hidden="true"></canvas>
+                    <canvas id="editorRuleCanvas" aria-hidden="true"></canvas>
                 </div>
             </div>
         </section>
