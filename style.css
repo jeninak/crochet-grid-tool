@@ -59,6 +59,24 @@ main {
     align-items: center;
 }
 
+.color-mode-control,
+.threshold-control {
+    margin: 16px 0;
+}
+
+.threshold-control label {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.threshold-control input[type="range"] {
+    display: block;
+    width: 100%;
+    max-width: 420px;
+    margin-top: 8px;
+}
+
 .color-controls input {
     grid-column: 1 / -1;
     width: 100%;

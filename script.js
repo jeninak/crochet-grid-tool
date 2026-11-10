@@ -1,10 +1,7 @@
-
 const imageInput = document.getElementById("imageInput");
 const originalImage = document.getElementById("originalImage");
-
 const gridWidthInput = document.getElementById("gridWidth");
 const gridHeightInput = document.getElementById("gridHeight");
-
 const generateBtn = document.getElementById("generateBtn");
 const gridCanvas = document.getElementById("gridCanvas");
 const gridPlaceholder = document.getElementById("gridPlaceholder");
@@ -12,42 +9,53 @@ const status = document.getElementById("status");
 const brightnessInput = document.getElementById("brightness");
 const contrastInput = document.getElementById("contrast");
 const saturationInput = document.getElementById("saturation");
+const twoColorInput = document.getElementById("twoColorMode");
+const thresholdInput = document.getElementById("darkThreshold");
+const thresholdValue = document.getElementById("darkThresholdValue");
+const thresholdControl = document.getElementById("thresholdControl");
 const enlargeBtn = document.getElementById("enlargeBtn");
 const downloadBtn = document.getElementById("downloadBtn");
 const largePreviewDialog = document.getElementById("largePreviewDialog");
 const largeGridCanvas = document.getElementById("largeGridCanvas");
 
-const ctx = gridCanvas.getContext("2d");
 const largeCtx = largeGridCanvas.getContext("2d");
-
-const STITCH_SIZE = 12;
 
 let uploadedImage = null;
 let generatedDimensions = null;
 
-function enhanceImage(imageData) {
-    const data = imageData.data;
-    const brightness = Number(brightnessInput.value) / 100;
-    const contrast = Number(contrastInput.value) / 100;
-    const saturation = Number(saturationInput.value) / 100;
+function renderGrid(width, height) {
+    const sourceCanvas = document.createElement("canvas");
+    sourceCanvas.width = width;
+    sourceCanvas.height = height;
 
-    for (let i = 0; i < data.length; i += 4) {
-        const red = data[i] * brightness;
-        const green = data[i + 1] * brightness;
-        const blue = data[i + 2] * brightness;
+    const sourceCtx = sourceCanvas.getContext("2d", {
+        willReadFrequently: true
+    });
 
-        const average = red * 0.2126 + green * 0.7152 + blue * 0.0722;
+    sourceCtx.fillStyle = "#ffffff";
+    sourceCtx.fillRect(0, 0, width, height);
+    sourceCtx.imageSmoothingEnabled = true;
+    sourceCtx.drawImage(uploadedImage, 0, 0, width, height);
 
-        const adjustedRed = (average + (red - average) * saturation - 128) * contrast + 128;
-        const adjustedGreen = (average + (green - average) * saturation - 128) * contrast + 128;
-        const adjustedBlue = (average + (blue - average) * saturation - 128) * contrast + 128;
+    const imageData = sourceCtx.getImageData(0, 0, width, height);
+    const adjustedImage = CrochetImageProcessing.adjustColors(imageData, {
+        brightness: Number(brightnessInput.value),
+        contrast: Number(contrastInput.value),
+        saturation: Number(saturationInput.value)
+    });
 
-        data[i] = Math.max(0, Math.min(255, adjustedRed));
-        data[i + 1] = Math.max(0, Math.min(255, adjustedGreen));
-        data[i + 2] = Math.max(0, Math.min(255, adjustedBlue));
+    if (twoColorInput.checked) {
+        CrochetImageProcessing.applyTwoColor(adjustedImage, Number(thresholdInput.value));
     }
 
-    return imageData;
+    CrochetGridRenderer.draw(adjustedImage, width, height, gridCanvas);
+
+    gridCanvas.hidden = false;
+    gridPlaceholder.hidden = true;
+    generatedDimensions = { width, height };
+    enlargeBtn.disabled = false;
+    downloadBtn.disabled = false;
+    status.textContent = `Grid generated successfully! ${width} × ${height} stitches.`;
 }
 
 function updateColorControls() {
@@ -55,8 +63,11 @@ function updateColorControls() {
         document.getElementById(`${control.id}Value`).value = `${control.value}%`;
     }
 
+    thresholdValue.value = thresholdInput.value;
+    thresholdControl.hidden = !twoColorInput.checked;
+
     if (uploadedImage && generatedDimensions) {
-        createGrid(generatedDimensions.width, generatedDimensions.height);
+        renderGrid(generatedDimensions.width, generatedDimensions.height);
     }
 }
 
@@ -77,17 +88,14 @@ imageInput.addEventListener("change", function(event) {
 
         image.onload = function() {
             uploadedImage = image;
-
             originalImage.src = e.target.result;
             originalImage.style.display = "block";
-
             generateBtn.disabled = false;
             generatedDimensions = null;
             gridCanvas.hidden = true;
             gridPlaceholder.hidden = false;
             enlargeBtn.disabled = true;
             downloadBtn.disabled = true;
-
             status.textContent = "Image uploaded successfully!";
         };
 
@@ -100,7 +108,6 @@ imageInput.addEventListener("change", function(event) {
 
     reader.readAsDataURL(file);
 });
-
 
 generateBtn.addEventListener("click", function() {
     if (!uploadedImage) return;
@@ -116,19 +123,19 @@ generateBtn.addEventListener("click", function() {
         gridWidth > 300 ||
         gridHeight > 300
     ) {
-        status.textContent =
-            "Grid dimensions must be between 1 and 300.";
+        status.textContent = "Grid dimensions must be between 1 and 300.";
         return;
     }
 
     status.textContent = "Generating crochet grid...";
-
-    createGrid(gridWidth, gridHeight);
+    renderGrid(gridWidth, gridHeight);
 });
 
-for (const control of [brightnessInput, contrastInput, saturationInput]) {
+for (const control of [brightnessInput, contrastInput, saturationInput, thresholdInput]) {
     control.addEventListener("input", updateColorControls);
 }
+
+twoColorInput.addEventListener("change", updateColorControls);
 
 enlargeBtn.addEventListener("click", function() {
     largeGridCanvas.width = gridCanvas.width;
@@ -161,102 +168,4 @@ downloadBtn.addEventListener("click", function() {
     }, "image/png");
 });
 
-function createGrid(width, height) {
-    const tempCanvas = document.createElement("canvas");
-
-    tempCanvas.width = width;
-    tempCanvas.height = height;
-
-    const tempCtx = tempCanvas.getContext("2d", {
-        willReadFrequently: true
-    });
-
-    tempCtx.fillStyle = "#ffffff";
-    tempCtx.fillRect(0, 0, width, height);
-    tempCtx.imageSmoothingEnabled = true;
-
-    tempCtx.drawImage(
-        uploadedImage,
-        0,
-        0,
-        width,
-        height
-    );
-
-    const imageData = tempCtx.getImageData(
-        0,
-        0,
-        width,
-        height
-    );
-
-    const enhancedData = enhanceImage(imageData);
-    const pixels = enhancedData.data;
-
-    gridCanvas.width = width * STITCH_SIZE;
-    gridCanvas.height = height * STITCH_SIZE;
-
-    gridCanvas.hidden = false;
-    gridPlaceholder.hidden = true;
-    generatedDimensions = { width, height };
-    enlargeBtn.disabled = false;
-    downloadBtn.disabled = false;
-
-    for (let y = 0; y < height; y++) {
-
-        for (let x = 0; x < width; x++) {
-
-            const index = (y * width + x) * 4;
-
-            const red = pixels[index];
-            const green = pixels[index + 1];
-            const blue = pixels[index + 2];
-            ctx.fillStyle = `rgb(${red}, ${green}, ${blue})`;
-
-            ctx.fillRect(
-                x * STITCH_SIZE,
-                y * STITCH_SIZE,
-                STITCH_SIZE,
-                STITCH_SIZE
-            );
-        }
-    }
-
-    drawGridLines(width, height);
-
-    status.textContent =
-        `Grid generated successfully! ${width} × ${height} stitches.`;
-}
-
-
-function drawGridLines(width, height) {
-    for (let x = 0; x <= width; x++) {
-        const majorLine = x % 10 === 0;
-
-        ctx.beginPath();
-
-        ctx.lineWidth = majorLine ? 2 : 1;
-        ctx.strokeStyle = majorLine ? "#333333" : "#999999";
-
-        const position = x * STITCH_SIZE + (majorLine ? 0 : 0.5);
-        ctx.moveTo(position, 0);
-        ctx.lineTo(position, height * STITCH_SIZE);
-
-        ctx.stroke();
-    }
-
-    for (let y = 0; y <= height; y++) {
-        const majorLine = y % 10 === 0;
-
-        ctx.beginPath();
-
-        ctx.lineWidth = majorLine ? 2 : 1;
-        ctx.strokeStyle = majorLine ? "#333333" : "#999999";
-
-        const position = y * STITCH_SIZE + (majorLine ? 0 : 0.5);
-        ctx.moveTo(0, position);
-        ctx.lineTo(width * STITCH_SIZE, position);
-
-        ctx.stroke();
-    }
-}
+updateColorControls();
