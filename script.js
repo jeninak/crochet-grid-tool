@@ -4,6 +4,7 @@ const gridWidthInput = document.getElementById("gridWidth");
 const gridHeightInput = document.getElementById("gridHeight");
 const generateBtn = document.getElementById("generateBtn");
 const gridCanvas = document.getElementById("gridCanvas");
+const gridContainer = document.getElementById("gridContainer");
 const gridPlaceholder = document.getElementById("gridPlaceholder");
 const status = document.getElementById("status");
 const patternTab = document.getElementById("patternTab");
@@ -19,6 +20,8 @@ const editorGridCanvas = document.getElementById("editorGridCanvas");
 const editorGuideCanvas = document.getElementById("editorGuideCanvas");
 const stitchColorInput = document.getElementById("stitchColor");
 const undoEditBtn = document.getElementById("undoEditBtn");
+const mosaicModeInput = document.getElementById("mosaicMode");
+const mosaicModeDescription = document.getElementById("mosaicModeDescription");
 const editorDimensions = document.getElementById("editorDimensions");
 const showGuideImageInput = document.getElementById("showGuideImage");
 const guidePositionInput = document.getElementById("guidePosition");
@@ -50,10 +53,13 @@ let uploadedImage = null;
 let guideImage = null;
 let guideImageDataUrl = null;
 let generatedDimensions = null;
+let requestedDimensions = null;
 let currentRow = 1;
 let stitchColors = null;
 let twoColorPattern = false;
 let patternEdited = false;
+let mosaicEnabled = false;
+let mosaicPatternData = null;
 
 function showView(view) {
     patternView.hidden = view !== "pattern";
@@ -63,6 +69,7 @@ function showView(view) {
     editorTab.setAttribute("aria-selected", String(view === "editor"));
     crochetTab.setAttribute("aria-selected", String(view === "crochet"));
     document.body.classList.toggle("editor-mode", view === "editor");
+    document.body.classList.toggle("pattern-mode", view === "pattern");
 }
 
 const pixelEditor = CrochetPixelEditor.create(
@@ -79,7 +86,7 @@ const pixelEditor = CrochetPixelEditor.create(
     }
 );
 
-function renderGrid(width, height) {
+function samplePattern(width, height) {
     const sourceCanvas = document.createElement("canvas");
     sourceCanvas.width = width;
     sourceCanvas.height = height;
@@ -93,8 +100,6 @@ function renderGrid(width, height) {
     sourceCtx.imageSmoothingEnabled = true;
     sourceCtx.drawImage(uploadedImage, 0, 0, width, height);
 
-    guideImage = uploadedImage;
-    guideImageDataUrl = sourceCanvas.toDataURL("image/png");
     const imageData = sourceCtx.getImageData(0, 0, width, height);
     const adjustedImage = CrochetImageProcessing.adjustColors(imageData, {
         brightness: Number(brightnessInput.value),
@@ -106,11 +111,36 @@ function renderGrid(width, height) {
         CrochetImageProcessing.applyTwoColor(adjustedImage, Number(thresholdInput.value));
     }
 
-    stitchColors = imageDataToColors(adjustedImage);
+    return {
+        canvas: sourceCanvas,
+        colors: imageDataToColors(adjustedImage)
+    };
+}
+
+function createPatternAtRequestedSize(width, requestedHeight) {
+    const pattern = samplePattern(width, requestedHeight);
+    const correctedStitches = CrochetStitchPatternRules.correctTwoRowTallSpots(
+        pattern.colors,
+        width,
+        requestedHeight,
+        twoColorInput.checked ? [0x333333, 0xffffff] : null
+    );
+    return { ...pattern, height: requestedHeight, correctedStitches };
+}
+
+function renderGrid(width, height) {
+    requestedDimensions = { width, height };
+    const pattern = createPatternAtRequestedSize(width, height);
+    height = pattern.height;
+    guideImage = uploadedImage;
+    stitchColors = pattern.colors;
+    guideImageDataUrl = pattern.canvas.toDataURL("image/png");
     twoColorPattern = twoColorInput.checked;
     patternEdited = false;
     setupPattern(width, height);
-    status.textContent = `Grid generated successfully! ${width} × ${height} stitches.`;
+    status.textContent = pattern.correctedStitches === 0
+        ? `Grid generated successfully! ${width} × ${height} stitches.`
+        : `Grid generated at the requested ${width} × ${height} size. ${pattern.correctedStitches} stitch${pattern.correctedStitches === 1 ? " was" : "es were"} adjusted to remove vertical same-color runs exactly 2 stitches tall.`;
 }
 
 function imageDataToColors(imageData) {
@@ -130,7 +160,8 @@ function imageDataToColors(imageData) {
 
 function setupPattern(width, height) {
     generatedDimensions = { width, height };
-    currentRow = Math.min(currentRow, height);
+    gridContainer.classList.add("has-pattern");
+    currentRow = Math.min(currentRow, height + (mosaicEnabled ? 3 : 0));
     pixelEditor.setPattern(stitchColors, width, height);
     renderPatternCanvases();
 
@@ -141,11 +172,16 @@ function setupPattern(width, height) {
     saveProjectBtn.disabled = false;
     editorTab.disabled = false;
     crochetTab.disabled = false;
+    mosaicModeInput.disabled = false;
+    mosaicModeInput.checked = mosaicEnabled;
     editorDimensions.textContent = `${width} stitches wide · ${height} rows`;
-    workspaceDimensions.textContent = editorDimensions.textContent;
     gridWidthInput.value = width;
     gridHeightInput.value = height;
-    currentRowInput.max = height;
+    const workspaceDimensionsValue = getWorkspaceDimensions();
+    workspaceDimensions.textContent = mosaicEnabled
+        ? `Mosaic pattern · ${workspaceDimensionsValue.width} stitches wide · ${workspaceDimensionsValue.height} rows`
+        : editorDimensions.textContent;
+    currentRowInput.max = workspaceDimensionsValue.height;
     currentRowInput.disabled = false;
     previousRowBtn.disabled = false;
     nextRowBtn.disabled = false;
@@ -163,6 +199,15 @@ function renderPatternCanvases() {
     if (guideImage) {
         drawGuideImage(width, height);
     }
+    if (mosaicEnabled) {
+        renderMosaicPattern();
+    } else {
+        mosaicPatternData = null;
+        workspaceDimensions.textContent = `${width} stitches wide · ${height} rows`;
+        currentRowInput.max = height;
+        currentRow = Math.min(currentRow, height);
+    }
+    mosaicModeDescription.hidden = !mosaicEnabled;
     updateGuidePreview();
     updateWorkspaceRow();
 }
@@ -193,25 +238,66 @@ function updateGuidePreview() {
     editorCanvas.parentElement.dataset.guidePosition = guidePositionInput.value;
 }
 
-function updateWorkspaceRow() {
-    if (!generatedDimensions) return;
+function renderMosaicPattern() {
+    if (!generatedDimensions || !stitchColors) return;
 
-    currentRowInput.value = currentRow;
-    currentRowStatus.textContent = `Row ${currentRow} of ${generatedDimensions.height}`;
-    previousRowBtn.disabled = currentRow <= 1;
-    nextRowBtn.disabled = currentRow >= generatedDimensions.height;
-    CrochetGridRenderer.highlightRow(
-        rowHighlightCanvas,
+    mosaicPatternData = CrochetMosaicPattern.create(
+        stitchColors,
         generatedDimensions.width,
         generatedDimensions.height,
-        currentRow - 1
+        Number(thresholdInput.value)
     );
+    CrochetMosaicPattern.draw(mosaicPatternData, gridCanvas);
+    CrochetMosaicPattern.draw(mosaicPatternData, workspaceCanvas);
+    workspaceDimensions.textContent =
+        `Mosaic pattern · ${mosaicPatternData.width} stitches wide · ${mosaicPatternData.height} rows`;
+    currentRowInput.max = mosaicPatternData.height;
+    currentRow = Math.min(currentRow, mosaicPatternData.height);
+    updateWorkspaceRow();
+}
+
+function updateMosaicMode() {
+    mosaicEnabled = mosaicModeInput.checked;
+    thresholdControl.hidden = !(twoColorInput.checked || mosaicEnabled);
+    if (generatedDimensions) {
+        renderPatternCanvases();
+        status.textContent = mosaicEnabled
+            ? "Mosaic crochet rules applied to the generated pattern."
+            : "Standard crochet pattern restored.";
+    }
+}
+
+function getWorkspaceDimensions() {
+    return mosaicEnabled && mosaicPatternData
+        ? { width: mosaicPatternData.width, height: mosaicPatternData.height }
+        : generatedDimensions;
+}
+
+function updateWorkspaceRow() {
+    const dimensions = getWorkspaceDimensions();
+    if (!dimensions) return;
+
+    currentRowInput.value = currentRow;
+    currentRowStatus.textContent = `Row ${currentRow} of ${dimensions.height}`;
+    previousRowBtn.disabled = currentRow <= 1;
+    nextRowBtn.disabled = currentRow >= dimensions.height;
+    if (mosaicEnabled && mosaicPatternData) {
+        CrochetMosaicPattern.highlightRow(rowHighlightCanvas, mosaicPatternData, currentRow - 1);
+    } else {
+        CrochetGridRenderer.highlightRow(
+            rowHighlightCanvas,
+            dimensions.width,
+            dimensions.height,
+            currentRow - 1
+        );
+    }
 }
 
 function setCurrentRow(row) {
-    if (!generatedDimensions || !Number.isInteger(row)) return;
+    const dimensions = getWorkspaceDimensions();
+    if (!dimensions || !Number.isInteger(row)) return;
 
-    currentRow = Math.max(1, Math.min(generatedDimensions.height, row));
+    currentRow = Math.max(1, Math.min(dimensions.height, row));
     updateWorkspaceRow();
 }
 
@@ -221,12 +307,15 @@ function updateColorControls() {
     }
 
     thresholdValue.value = thresholdInput.value;
-    thresholdControl.hidden = !twoColorInput.checked;
+    thresholdControl.hidden = !(twoColorInput.checked || mosaicEnabled);
 
     if (uploadedImage && generatedDimensions && !patternEdited) {
-        renderGrid(generatedDimensions.width, generatedDimensions.height);
-    } else if (patternEdited) {
-        status.textContent = "Pattern edits are preserved. Generate again to apply color changes.";
+        renderGrid(generatedDimensions.width, requestedDimensions.height);
+    } else if (patternEdited || mosaicEnabled) {
+        renderPatternCanvases();
+        if (patternEdited) {
+            status.textContent = "Pattern edits are preserved. Generate again to apply color changes.";
+        }
     }
 }
 
@@ -250,7 +339,8 @@ function saveProject() {
             visible: showGuideImageInput.checked,
             position: guidePositionInput.value,
             opacity: Number(guideOpacityInput.value)
-        }
+        },
+        mosaicEnabled
     });
 
     const blob = new Blob([JSON.stringify(project)], { type: "application/json" });
@@ -286,9 +376,13 @@ function importProject(file) {
             contrastInput.value = project.adjustments.contrast;
             saturationInput.value = project.adjustments.saturation;
             thresholdInput.value = project.adjustments.threshold;
+            requestedDimensions = { width: project.width, height: project.height };
             showGuideImageInput.checked = project.guideSettings?.visible ?? false;
             guidePositionInput.value = project.guideSettings?.position ?? "above";
             guideOpacityInput.value = project.guideSettings?.opacity ?? 35;
+            mosaicEnabled = project.mosaicEnabled ?? false;
+            mosaicModeInput.checked = mosaicEnabled;
+
             updateColorControls();
             updateGuidePreview();
             setupPattern(project.width, project.height);
@@ -344,21 +438,28 @@ imageInput.addEventListener("change", function(event) {
             guideImageDataUrl = null;
             stitchColors = null;
             generatedDimensions = null;
+            requestedDimensions = null;
             patternEdited = false;
+            mosaicPatternData = null;
             pixelEditor.reset();
             originalImage.src = e.target.result;
             originalImage.style.display = "block";
             generateBtn.disabled = false;
             currentRow = 1;
             showGuideImageInput.checked = false;
+            mosaicEnabled = false;
+            mosaicModeInput.checked = false;
+            mosaicModeDescription.hidden = true;
             updateGuidePreview();
             gridCanvas.hidden = true;
+            gridContainer.classList.remove("has-pattern");
             gridPlaceholder.hidden = false;
             enlargeBtn.disabled = true;
             downloadBtn.disabled = true;
             crochetTab.disabled = true;
             editorTab.disabled = true;
             saveProjectBtn.disabled = true;
+            mosaicModeInput.disabled = true;
             undoEditBtn.disabled = true;
             currentRowInput.disabled = true;
             previousRowBtn.disabled = true;
@@ -475,7 +576,7 @@ downloadBtn.addEventListener("click", function() {
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = "crochet-pattern.png";
+        link.download = mosaicEnabled ? "mosaic-crochet-pattern.png" : "crochet-pattern.png";
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -484,5 +585,7 @@ downloadBtn.addEventListener("click", function() {
         }, 1000);
     }, "image/png");
 });
+
+mosaicModeInput.addEventListener("change", updateMosaicMode);
 
 updateColorControls();

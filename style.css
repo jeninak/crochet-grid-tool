@@ -250,6 +250,12 @@ input[type="file"]::file-selector-button:hover {
     font-weight: 600;
 }
 
+.dimension-note {
+    margin: -10px 0 22px;
+    color: var(--muted);
+    font-size: 0.86rem;
+}
+
 input[type="number"] {
     width: 160px;
     padding: 11px 12px;
@@ -278,6 +284,27 @@ input[type="number"]:focus {
 .color-mode-control,
 .threshold-control {
     margin: 14px 0;
+}
+
+.color-adjustments {
+    margin-bottom: 14px;
+    padding: 14px 16px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: #fafbf8;
+}
+
+.color-adjustments h3 {
+    margin: 0;
+    color: var(--ink);
+    font-size: 0.98rem;
+    font-weight: 650;
+}
+
+.color-adjustments > p {
+    margin: 8px 0 0;
+    color: var(--muted);
+    font-size: 0.84rem;
 }
 
 .color-mode-control label {
@@ -401,7 +428,7 @@ button:disabled {
 
 .preview {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
     gap: 24px;
 }
 
@@ -411,10 +438,48 @@ button:disabled {
 }
 
 .preview-panel h2 {
-    margin: 0 0 17px;
+    margin: 0;
     font-family: Georgia, "Times New Roman", serif;
     font-size: 1.35rem;
     font-weight: 500;
+}
+
+.preview-panel > h2 {
+    margin-bottom: 17px;
+}
+
+.pattern-preview-heading {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 17px;
+}
+
+.pattern-mode-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 11px;
+    border: 1px solid #d5ded5;
+    border-radius: 9px;
+    background: var(--soft-green);
+    color: var(--green-dark);
+    cursor: pointer;
+    font-size: 0.88rem;
+    font-weight: 650;
+}
+
+.pattern-mode-toggle:has(input:disabled) {
+    color: #8d9990;
+    cursor: not-allowed;
+}
+
+.mosaic-mode-description {
+    margin: -5px 0 14px;
+    color: #59665e;
+    font-size: 0.88rem;
 }
 
 .crochet-workspace {
@@ -600,7 +665,15 @@ button:disabled {
     padding: 16px 24px;
 }
 
+.pattern-mode header {
+    padding: 16px 24px;
+}
+
 .editor-mode header h1 {
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+}
+
+.pattern-mode header h1 {
     font-size: clamp(1.7rem, 3vw, 2.4rem);
 }
 
@@ -609,7 +682,13 @@ button:disabled {
     font-size: 0.9rem;
 }
 
-.editor-mode main {
+.pattern-mode header p {
+    margin-top: 4px;
+    font-size: 0.9rem;
+}
+
+.editor-mode main,
+.pattern-mode main {
     display: flex;
     width: 100%;
     max-width: none;
@@ -619,16 +698,79 @@ button:disabled {
     padding: 12px 20px 16px;
 }
 
-.editor-mode .workspace-tabs {
+.editor-mode .workspace-tabs,
+.pattern-mode .workspace-tabs {
     margin-bottom: 10px;
 }
 
-.editor-mode .project-file-controls {
+.editor-mode .project-file-controls,
+.pattern-mode .project-file-controls {
     margin-bottom: 8px;
 }
 
-.editor-mode #status {
+.editor-mode #status,
+.pattern-mode #status {
     margin: 2px 0 8px;
+}
+
+.pattern-mode #patternView {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+}
+
+.pattern-mode .settings {
+    margin-bottom: 12px;
+    padding: 16px 20px;
+}
+
+.pattern-mode .settings h2 {
+    margin: 8px 0;
+}
+
+.pattern-mode .dimension-inputs {
+    margin: 8px 0;
+}
+
+.pattern-mode .dimension-note {
+    margin: 0 0 10px;
+}
+
+.pattern-mode #generateBtn {
+    padding: 9px 16px;
+}
+
+.pattern-mode .preview {
+    min-height: 0;
+    flex: 1;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    gap: 12px;
+}
+
+.pattern-mode .preview-panel {
+    padding: 16px;
+}
+
+.pattern-mode #originalImage {
+    width: auto;
+    max-width: 100%;
+    max-height: 180px;
+}
+
+.pattern-mode .preview-panel:has(#gridContainer) {
+    display: flex;
+    min-height: 0;
+    flex: 1;
+    flex-direction: column;
+}
+
+.pattern-mode #gridContainer.has-pattern {
+    height: min(72vh, 900px);
+    min-height: min(60vh, 600px);
+    max-height: min(72vh, 900px);
+    flex: none;
 }
 
 .editor-mode .editor-workspace {
@@ -647,6 +789,30 @@ button:disabled {
 .editor-mode .guide-controls {
     margin-bottom: 10px;
     padding: 10px 14px;
+}
+
+.editor-mode .color-adjustments {
+    margin-bottom: 10px;
+    padding: 8px 12px;
+}
+
+.editor-mode .color-adjustments > p {
+    margin-top: 4px;
+}
+
+.editor-mode .color-adjustments .color-mode-control,
+.editor-mode .color-adjustments .threshold-control {
+    margin: 6px 0;
+}
+
+.editor-mode .color-controls {
+    gap: 8px;
+    margin: 8px 0;
+}
+
+.editor-mode .color-controls label {
+    gap: 5px 8px;
+    padding: 8px 10px;
 }
 
 .editor-mode .editor-toolbar > p {
@@ -771,9 +937,9 @@ button:disabled {
 #gridContainer {
     display: grid;
     min-height: 250px;
-    max-height: 700px;
+    max-height: min(72vh, 900px);
     overflow: auto;
-    place-items: center;
+    place-items: start center;
     border: 1px solid #eeede6;
     border-radius: 10px;
     background-color: #fafaf6;

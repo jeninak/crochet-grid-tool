@@ -10,6 +10,7 @@ window.CrochetPatternProject = (function() {
             adjustments: pattern.adjustments,
             guideImage: pattern.guideImage,
             guideSettings: pattern.guideSettings,
+            mosaicEnabled: pattern.mosaicEnabled,
             stitches: Array.from(pattern.stitches)
         };
     }
@@ -35,7 +36,7 @@ window.CrochetPatternProject = (function() {
             height > 300 ||
             !Number.isInteger(currentRow) ||
             currentRow < 1 ||
-            currentRow > height
+            currentRow > height + (project.mosaicEnabled === true ? 3 : 0)
         ) {
             throw new Error("Pattern dimensions or current row are invalid.");
         }
@@ -84,6 +85,10 @@ window.CrochetPatternProject = (function() {
                 guideSettings.opacity > 100)
         ) {
             throw new Error("Guide display settings are invalid.");
+        }
+
+        if (project.mosaicEnabled !== undefined && typeof project.mosaicEnabled !== "boolean") {
+            throw new Error("Mosaic pattern setting is invalid.");
         }
     }
 

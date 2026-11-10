@@ -53,32 +53,7 @@
                         <input type="number" id="gridHeight" value="180" min="1" max="300">
                     </label>
                 </div>
-
-                <h2>3. Adjust pattern colors</h2>
-                <div class="color-mode-control">
-                    <label>
-                        <input type="checkbox" id="twoColorMode">
-                        Use two colors (white and dark grey)
-                    </label>
-                </div>
-                <div class="threshold-control" id="thresholdControl" hidden>
-                    <label for="darkThreshold">Darkness threshold <output id="darkThresholdValue">128</output></label>
-                    <input type="range" id="darkThreshold" min="0" max="255" value="128">
-                </div>
-                <div class="color-controls">
-                    <label>
-                        Brightness <output id="brightnessValue">100%</output>
-                        <input type="range" id="brightness" min="0" max="200" value="100">
-                    </label>
-                    <label>
-                        Contrast <output id="contrastValue">100%</output>
-                        <input type="range" id="contrast" min="0" max="200" value="100">
-                    </label>
-                    <label>
-                        Saturation <output id="saturationValue">100%</output>
-                        <input type="range" id="saturation" min="0" max="200" value="100">
-                    </label>
-                </div>
+                <p class="dimension-note">The generated grid always keeps these dimensions. Vertical same-color runs exactly 2 stitches tall are corrected; side-by-side matches and taller vertical runs are allowed.</p>
 
                 <button id="generateBtn" disabled>
                     Generate crochet grid
@@ -92,7 +67,18 @@
                 </div>
 
                 <div class="preview-panel">
-                    <h2>Crochet grid</h2>
+                    <div class="pattern-preview-heading">
+                        <h2>Crochet grid</h2>
+                        <label class="pattern-mode-toggle" for="mosaicMode">
+                            <input id="mosaicMode" type="checkbox" disabled>
+                            Use mosaic crochet rules
+                        </label>
+                    </div>
+                    <p id="mosaicModeDescription" class="mosaic-mode-description" hidden>
+                        This replaces the displayed pattern with alternating dark-grey and white rows, two setup rows, two border stitches
+                        per row, and a finishing row. X marks are dropped double crochets worked into the front loop two rows below. Work
+                        unmarked stitches as SC BLO, both loops at each edge, and do not turn; fasten off at each row end.
+                    </p>
                     <div id="gridContainer">
                         <p id="gridPlaceholder">Your generated grid will appear here.</p>
                         <canvas id="gridCanvas" hidden></canvas>
@@ -113,6 +99,34 @@
                 </div>
                 <p id="editorDimensions" class="workspace-dimensions"></p>
             </div>
+            <section class="color-adjustments" aria-labelledby="colorAdjustmentsHeading">
+                <h3 id="colorAdjustmentsHeading">Pattern color adjustments</h3>
+                <div class="color-mode-control">
+                    <label>
+                        <input type="checkbox" id="twoColorMode">
+                        Use two colors (white and dark grey)
+                    </label>
+                </div>
+                <div class="threshold-control" id="thresholdControl" hidden>
+                    <label for="darkThreshold"><span>Darkness threshold</span><output id="darkThresholdValue">128</output></label>
+                    <input type="range" id="darkThreshold" min="0" max="255" value="128">
+                </div>
+                <div class="color-controls">
+                    <label>
+                        Brightness <output id="brightnessValue">100%</output>
+                        <input type="range" id="brightness" min="0" max="200" value="100">
+                    </label>
+                    <label>
+                        Contrast <output id="contrastValue">100%</output>
+                        <input type="range" id="contrast" min="0" max="200" value="100">
+                    </label>
+                    <label>
+                        Saturation <output id="saturationValue">100%</output>
+                        <input type="range" id="saturation" min="0" max="200" value="100">
+                    </label>
+                </div>
+                <p>Color changes update the generated pattern until you paint stitches. To apply new settings afterward, generate the pattern again; this replaces manual edits.</p>
+            </section>
             <div class="editor-toolbar">
                 <label class="stitch-color-control" for="stitchColor">
                     Stitch color
@@ -189,8 +203,10 @@
 
     <script src="image-processing.js"></script>
     <script src="grid-renderer.js"></script>
+    <script src="stitch-pattern-rules.js"></script>
     <script src="pixel-editor.js"></script>
     <script src="pattern-project.js"></script>
+    <script src="mosaic-pattern.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
