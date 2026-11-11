@@ -55,12 +55,35 @@ window.CrochetGridRenderer = (function() {
         context.lineWidth = 2;
 
         for (const spot of spots) {
-            for (const index of spot.indices) {
+            const indices = spot.indices || [spot.index];
+            for (const index of indices) {
                 const x = (index % width) * STITCH_SIZE;
                 const y = Math.floor(index / width) * STITCH_SIZE;
                 context.fillRect(x, y, STITCH_SIZE, STITCH_SIZE);
                 context.strokeRect(x + 1, y + 1, STITCH_SIZE - 2, STITCH_SIZE - 2);
             }
+        }
+    }
+
+    function drawRowColorIndicator(canvas, rowColors) {
+        canvas.width = 22;
+        canvas.height = rowColors.length * STITCH_SIZE;
+
+        const context = canvas.getContext("2d");
+        context.fillStyle = "#f5f4ee";
+        context.fillRect(0, 0, canvas.width, canvas.height);
+
+        for (let row = 0; row < rowColors.length; row++) {
+            const color = rowColors[row];
+            const red = (color >> 16) & 255;
+            const green = (color >> 8) & 255;
+            const blue = color & 255;
+            const top = row * STITCH_SIZE + 1;
+            context.fillStyle = `rgb(${red}, ${green}, ${blue})`;
+            context.fillRect(3, top, 16, STITCH_SIZE - 2);
+            context.strokeStyle = "#85857e";
+            context.lineWidth = 1;
+            context.strokeRect(3.5, top + 0.5, 15, STITCH_SIZE - 3);
         }
     }
 
@@ -172,6 +195,7 @@ window.CrochetGridRenderer = (function() {
         drawColors,
         drawGridOverlay,
         drawRuleOverlay,
+        drawRowColorIndicator,
         drawCoordinateRulers,
         highlightRow
     };

@@ -8,6 +8,7 @@ const gridContainer = document.getElementById("gridContainer");
 const gridRulerLayout = document.getElementById("gridRulerLayout");
 const gridColumnRuler = document.getElementById("gridColumnRuler");
 const gridRowRuler = document.getElementById("gridRowRuler");
+const gridRowColorIndicator = document.getElementById("gridRowColorIndicator");
 const gridPlaceholder = document.getElementById("gridPlaceholder");
 const status = document.getElementById("status");
 const patternTab = document.getElementById("patternTab");
@@ -24,6 +25,7 @@ const editorGuideCanvas = document.getElementById("editorGuideCanvas");
 const editorRuleCanvas = document.getElementById("editorRuleCanvas");
 const editorColumnRuler = document.getElementById("editorColumnRuler");
 const editorRowRuler = document.getElementById("editorRowRuler");
+const editorRowColorIndicator = document.getElementById("editorRowColorIndicator");
 const stitchColorInput = document.getElementById("stitchColor");
 const undoEditBtn = document.getElementById("undoEditBtn");
 const mosaicModeInput = document.getElementById("mosaicMode");
@@ -38,6 +40,7 @@ const workspaceCanvas = document.getElementById("workspaceCanvas");
 const rowHighlightCanvas = document.getElementById("rowHighlightCanvas");
 const workspaceColumnRuler = document.getElementById("workspaceColumnRuler");
 const workspaceRowRuler = document.getElementById("workspaceRowRuler");
+const workspaceRowColorIndicator = document.getElementById("workspaceRowColorIndicator");
 const currentRowInput = document.getElementById("currentRowInput");
 const currentRowStatus = document.getElementById("currentRowStatus");
 const previousRowBtn = document.getElementById("previousRowBtn");
@@ -46,10 +49,8 @@ const workspaceDimensions = document.getElementById("workspaceDimensions");
 const brightnessInput = document.getElementById("brightness");
 const contrastInput = document.getElementById("contrast");
 const saturationInput = document.getElementById("saturation");
-const twoColorInput = document.getElementById("twoColorMode");
 const thresholdInput = document.getElementById("darkThreshold");
 const thresholdValue = document.getElementById("darkThresholdValue");
-const thresholdControl = document.getElementById("thresholdControl");
 const downloadBtn = document.getElementById("downloadBtn");
 const editorDownloadBtn = document.getElementById("editorDownloadBtn");
 
@@ -60,6 +61,7 @@ let generatedDimensions = null;
 let requestedDimensions = null;
 let currentRow = 1;
 let stitchColors = null;
+let firstRowColor = 0xffffff;
 let twoColorPattern = false;
 let patternEdited = false;
 let mosaicEnabled = false;
@@ -135,9 +137,7 @@ function samplePattern(width, height) {
         saturation: Number(saturationInput.value)
     });
 
-    if (twoColorInput.checked) {
-        CrochetImageProcessing.applyTwoColor(adjustedImage, Number(thresholdInput.value));
-    }
+    CrochetImageProcessing.applyTwoColor(adjustedImage, Number(thresholdInput.value));
 
     return {
         canvas: sourceCanvas,
@@ -147,13 +147,18 @@ function samplePattern(width, height) {
 
 function createPatternAtRequestedSize(width, requestedHeight) {
     const pattern = samplePattern(width, requestedHeight);
-    const correctedStitches = CrochetStitchPatternRules.correctTwoRowTallSpots(
+    const correction = CrochetStitchPatternRules.correctAlternatingColorStarts(
         pattern.colors,
         width,
         requestedHeight,
-        twoColorInput.checked ? [0x333333, 0xffffff] : null
+        [0x333333, 0xffffff]
     );
-    return { ...pattern, height: requestedHeight, correctedStitches };
+    return {
+        ...pattern,
+        height: requestedHeight,
+        correctedStitches: correction.changed,
+        firstRowColor: correction.firstRowColor
+    };
 }
 
 function renderGrid(width, height) {
@@ -162,13 +167,26 @@ function renderGrid(width, height) {
     height = pattern.height;
     guideImage = uploadedImage;
     stitchColors = pattern.colors;
+    firstRowColor = pattern.firstRowColor;
     guideImageDataUrl = pattern.canvas.toDataURL("image/png");
-    twoColorPattern = twoColorInput.checked;
+    twoColorPattern = true;
     patternEdited = false;
     setupPattern(width, height);
     status.textContent = pattern.correctedStitches === 0
-        ? `Grid generated successfully! ${width} × ${height} stitches.`
-        : `Grid generated at the requested ${width} × ${height} size. ${pattern.correctedStitches} stitch${pattern.correctedStitches === 1 ? " was" : "es were"} adjusted to remove vertical same-color runs exactly 2 stitches tall.`;
+        ? `Grid generated successfully! ${width} × ${height} stitches with ${colorName(pattern.firstRowColor)} starting on row 1.`
+        : `Grid generated at the requested ${width} × ${height} size. ${pattern.correctedStitches} stitch${pattern.correctedStitches === 1 ? " was" : "es were"} adjusted to follow alternating color starts and prevent two-stitch-tall runs. Row 1 starts ${colorName(pattern.firstRowColor)}.`;
+}
+
+function colorName(color) {
+    return color === 0x333333 ? "dark grey" : "white";
+}
+
+function inferFirstRowColor(colors, width) {
+    let darkGreyCount = 0;
+    for (let x = 0; x < width; x++) {
+        if (colors[x] === 0x333333) darkGreyCount++;
+    }
+    return darkGreyCount > width / 2 ? 0x333333 : 0xffffff;
 }
 
 function imageDataToColors(imageData) {
@@ -227,9 +245,19 @@ function renderPatternCanvases() {
     CrochetGridRenderer.drawGridOverlay(editorGridCanvas, width, height, twoColorPattern);
     CrochetGridRenderer.drawRuleOverlay(
         editorRuleCanvas,
-        CrochetStitchPatternRules.findTwoRowTallSpots(stitchColors, width, height),
+        CrochetStitchPatternRules.findAlternatingColorViolations(
+            stitchColors,
+            width,
+            height,
+            firstRowColor,
+            [0x333333, 0xffffff]
+        ),
         width,
         height
+    );
+    CrochetGridRenderer.drawRowColorIndicator(
+        editorRowColorIndicator,
+        getAlternatingRowColors(firstRowColor, height)
     );
     CrochetGridRenderer.drawCoordinateRulers(
         editorColumnRuler,
@@ -249,6 +277,11 @@ function renderPatternCanvases() {
         currentRow = Math.min(currentRow, height);
     }
     const chart = mosaicEnabled ? mosaicPatternData : { width, height, labelWidth: 0 };
+    const rowColors = mosaicEnabled
+        ? mosaicPatternData.rows.map(row => row.color)
+        : getAlternatingRowColors(firstRowColor, height);
+    CrochetGridRenderer.drawRowColorIndicator(gridRowColorIndicator, rowColors);
+    CrochetGridRenderer.drawRowColorIndicator(workspaceRowColorIndicator, rowColors);
     CrochetGridRenderer.drawCoordinateRulers(
         gridColumnRuler,
         gridRowRuler,
@@ -312,9 +345,15 @@ function renderMosaicPattern() {
     updateWorkspaceRow();
 }
 
+function getAlternatingRowColors(startColor, height) {
+    const otherColor = startColor === 0x333333 ? 0xffffff : 0x333333;
+    return Array.from({ length: height }, (_, row) =>
+        row % 2 === 0 ? startColor : otherColor
+    );
+}
+
 function updateMosaicMode() {
     mosaicEnabled = mosaicModeInput.checked;
-    thresholdControl.hidden = !(twoColorInput.checked || mosaicEnabled);
     if (generatedDimensions) {
         renderPatternCanvases();
         status.textContent = mosaicEnabled
@@ -361,9 +400,7 @@ function updateColorControls() {
     for (const control of [brightnessInput, contrastInput, saturationInput]) {
         document.getElementById(`${control.id}Value`).value = `${control.value}%`;
     }
-
     thresholdValue.value = thresholdInput.value;
-    thresholdControl.hidden = !(twoColorInput.checked || mosaicEnabled);
 
     if (uploadedImage && generatedDimensions && !patternEdited) {
         renderGrid(generatedDimensions.width, requestedDimensions.height);
@@ -383,6 +420,7 @@ function saveProject() {
         height: generatedDimensions.height,
         currentRow,
         twoColor: twoColorPattern,
+        firstRowColor,
         adjustments: {
             brightness: Number(brightnessInput.value),
             contrast: Number(contrastInput.value),
@@ -425,9 +463,9 @@ function importProject(file) {
             guideImageDataUrl = project.guideImage || null;
             stitchColors = Uint32Array.from(project.stitches);
             twoColorPattern = project.twoColor;
+            firstRowColor = project.firstRowColor ?? inferFirstRowColor(stitchColors, project.width);
             patternEdited = false;
             currentRow = project.currentRow;
-            twoColorInput.checked = project.twoColor;
             brightnessInput.value = project.adjustments.brightness;
             contrastInput.value = project.adjustments.contrast;
             saturationInput.value = project.adjustments.saturation;
@@ -564,8 +602,6 @@ generateBtn.addEventListener("click", function() {
 for (const control of [brightnessInput, contrastInput, saturationInput, thresholdInput]) {
     control.addEventListener("input", updateColorControls);
 }
-
-twoColorInput.addEventListener("change", updateColorControls);
 
 showGuideImageInput.addEventListener("change", updateGuidePreview);
 guidePositionInput.addEventListener("change", updateGuidePreview);

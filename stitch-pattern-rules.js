@@ -1,4 +1,135 @@
 window.CrochetStitchPatternRules = (function() {
+    function correctAlternatingColorStarts(colors, width, height, palette) {
+        const normalizedPalette = Array.from(new Set(palette));
+        if (normalizedPalette.length !== 2) {
+            throw new Error("Alternating color starts require exactly two stitch colors.");
+        }
+
+        const phases = normalizedPalette.map(firstColor =>
+            correctPatternForPhase(colors, width, height, normalizedPalette, firstColor)
+        );
+        const best = phases.reduce((current, candidate) =>
+            candidate.score < current.score ? candidate : current
+        );
+        colors.set(best.colors);
+        return {
+            changed: best.changed,
+            firstRowColor: best.firstRowColor
+        };
+    }
+
+    function correctPatternForPhase(sourceColors, width, height, palette, firstRowColor) {
+        const result = new Uint32Array(sourceColors.length);
+        const firstColorIndex = palette.indexOf(firstRowColor);
+        const changePenalty = width * height * 2 + 1;
+        let score = 0;
+        let changed = 0;
+
+        for (let x = 0; x < width; x++) {
+            const layers = [];
+            let states = new Map();
+            const firstKey = `${firstColorIndex}:1`;
+            states.set(firstKey, {
+                colorIndex: firstColorIndex,
+                runLength: 1,
+                score: cellScore(sourceColors, width, x, 0, firstRowColor, changePenalty),
+                previousKey: null
+            });
+            layers.push(states);
+
+            for (let y = 1; y < height; y++) {
+                const nextStates = new Map();
+                const rowColorIndex = (y % 2 === 0) ? firstColorIndex : 1 - firstColorIndex;
+
+                for (const [previousKey, previous] of states) {
+                    for (let colorIndex = 0; colorIndex < palette.length; colorIndex++) {
+                        const sameColor = colorIndex === previous.colorIndex;
+                        if (!sameColor && (previous.runLength === 2 || colorIndex !== rowColorIndex)) {
+                            continue;
+                        }
+
+                        const runLength = sameColor ? Math.min(3, previous.runLength + 1) : 1;
+                        const nextColor = palette[colorIndex];
+                        const nextScore = previous.score +
+                            cellScore(sourceColors, width, x, y, nextColor, changePenalty);
+                        const key = `${colorIndex}:${runLength}`;
+                        const current = nextStates.get(key);
+                        if (!current || nextScore < current.score) {
+                            nextStates.set(key, {
+                                colorIndex,
+                                runLength,
+                                score: nextScore,
+                                previousKey
+                            });
+                        }
+                    }
+                }
+
+                states = nextStates;
+                layers.push(states);
+            }
+
+            let bestKey = null;
+            let bestState = null;
+            for (const [key, state] of states) {
+                if (state.runLength !== 2 && (!bestState || state.score < bestState.score)) {
+                    bestKey = key;
+                    bestState = state;
+                }
+            }
+            if (!bestState) {
+                throw new Error("Could not create a valid alternating-color stitch column.");
+            }
+
+            score += bestState.score;
+            for (let y = height - 1; y >= 0; y--) {
+                const state = layers[y].get(bestKey);
+                const index = y * width + x;
+                const color = palette[state.colorIndex];
+                result[index] = color;
+                if (sourceColors[index] !== color) changed++;
+                bestKey = state.previousKey;
+            }
+        }
+
+        return { colors: result, score, changed, firstRowColor };
+    }
+
+    function cellScore(colors, width, x, y, color, changePenalty) {
+        const index = y * width + x;
+        let score = colors[index] === color ? 0 : changePenalty;
+        if (x > 0 && colors[index - 1] !== color) score++;
+        if (x + 1 < width && colors[index + 1] !== color) score++;
+        return score;
+    }
+
+    function findAlternatingColorViolations(colors, width, height, firstRowColor, palette) {
+        const violations = new Set();
+        const otherColor = palette.find(color => color !== firstRowColor);
+
+        for (let x = 0; x < width; x++) {
+            if (colors[x] !== firstRowColor) violations.add(x);
+
+            for (let y = 1; y < height; y++) {
+                const index = y * width + x;
+                const color = colors[index];
+                const above = colors[index - width];
+                const assignedColor = y % 2 === 0 ? firstRowColor : otherColor;
+                if (color !== above && color !== assignedColor) {
+                    violations.add(index);
+                }
+            }
+        }
+
+        for (const spot of findTwoRowTallSpots(colors, width, height)) {
+            for (const index of spot.indices) {
+                violations.add(index);
+            }
+        }
+
+        return Array.from(violations, index => ({ index }));
+    }
+
     function findTwoRowTallSpots(colors, width, height) {
         const spots = [];
 
@@ -222,5 +353,11 @@ window.CrochetStitchPatternRules = (function() {
             blueDifference * blueDifference;
     }
 
-    return { findTwoRowTallSpots, hasTwoRowTallSpots, correctTwoRowTallSpots };
+    return {
+        correctAlternatingColorStarts,
+        findAlternatingColorViolations,
+        findTwoRowTallSpots,
+        hasTwoRowTallSpots,
+        correctTwoRowTallSpots
+    };
 })();

@@ -7,6 +7,7 @@ window.CrochetPatternProject = (function() {
             height: pattern.height,
             currentRow: pattern.currentRow,
             twoColor: pattern.twoColor,
+            firstRowColor: pattern.firstRowColor,
             adjustments: pattern.adjustments,
             guideImage: pattern.guideImage,
             guideSettings: pattern.guideSettings,
@@ -51,6 +52,8 @@ window.CrochetPatternProject = (function() {
 
         if (
             typeof project.twoColor !== "boolean" ||
+            (project.firstRowColor !== undefined &&
+                ![0x333333, 0xffffff].includes(project.firstRowColor)) ||
             !adjustments ||
             !Number.isFinite(adjustments.brightness) ||
             !Number.isFinite(adjustments.contrast) ||

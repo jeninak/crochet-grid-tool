@@ -281,9 +281,14 @@ input[type="number"]:focus {
     box-shadow: 0 0 0 3px rgb(78 130 102 / 12%);
 }
 
-.color-mode-control,
 .threshold-control {
     margin: 14px 0;
+}
+
+.color-mode-description {
+    margin: 8px 0 14px;
+    color: var(--muted);
+    font-size: 0.88rem;
 }
 
 .color-adjustments {
@@ -305,15 +310,6 @@ input[type="number"]:focus {
     margin: 8px 0 0;
     color: var(--muted);
     font-size: 0.84rem;
-}
-
-.color-mode-control label {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    color: #45554b;
-    font-weight: 550;
-    cursor: pointer;
 }
 
 input[type="checkbox"],
@@ -627,12 +623,16 @@ button:disabled {
 .chart-coordinate-layout {
     display: grid;
     width: max-content;
-    grid-template-columns: 38px max-content;
+    grid-template-columns: 22px 38px max-content;
     grid-template-rows: 24px max-content;
     grid-template-areas:
-        ". columns"
-        "rows chart";
+        ". . columns"
+        "colors rows chart";
     margin: 0 auto;
+}
+
+.row-color-indicator {
+    grid-area: colors;
 }
 
 .column-coordinate-ruler {
@@ -861,7 +861,6 @@ button:disabled {
     margin-top: 4px;
 }
 
-.editor-mode .color-adjustments .color-mode-control,
 .editor-mode .color-adjustments .threshold-control {
     margin: 6px 0;
 }
