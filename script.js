@@ -50,12 +50,7 @@ const twoColorInput = document.getElementById("twoColorMode");
 const thresholdInput = document.getElementById("darkThreshold");
 const thresholdValue = document.getElementById("darkThresholdValue");
 const thresholdControl = document.getElementById("thresholdControl");
-const enlargeBtn = document.getElementById("enlargeBtn");
 const downloadBtn = document.getElementById("downloadBtn");
-const largePreviewDialog = document.getElementById("largePreviewDialog");
-const largeGridCanvas = document.getElementById("largeGridCanvas");
-
-const largeCtx = largeGridCanvas.getContext("2d");
 
 let uploadedImage = null;
 let guideImage = null;
@@ -200,7 +195,6 @@ function setupPattern(width, height) {
     gridCanvas.hidden = false;
     gridRulerLayout.hidden = false;
     gridPlaceholder.hidden = true;
-    enlargeBtn.disabled = false;
     downloadBtn.disabled = false;
     saveProjectBtn.disabled = false;
     editorTab.disabled = false;
@@ -515,7 +509,6 @@ imageInput.addEventListener("change", function(event) {
             gridRulerLayout.hidden = true;
             gridContainer.classList.remove("has-pattern");
             gridPlaceholder.hidden = false;
-            enlargeBtn.disabled = true;
             downloadBtn.disabled = true;
             crochetTab.disabled = true;
             editorTab.disabled = true;
@@ -614,17 +607,6 @@ nextRowBtn.addEventListener("click", function() {
 currentRowInput.addEventListener("change", function() {
     const row = Number(currentRowInput.value);
     setCurrentRow(row);
-});
-
-enlargeBtn.addEventListener("click", function() {
-    largeGridCanvas.width = gridCanvas.width;
-    largeGridCanvas.height = gridCanvas.height;
-    largeCtx.drawImage(gridCanvas, 0, 0);
-    largePreviewDialog.showModal();
-});
-
-document.getElementById("closePreviewBtn").addEventListener("click", function() {
-    largePreviewDialog.close();
 });
 
 downloadBtn.addEventListener("click", function() {

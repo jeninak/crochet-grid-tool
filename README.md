@@ -39,7 +39,7 @@ The app is a static website and processes the selected image in your browser.
 3. Select **Generate crochet grid**. The generated grid always retains the requested width and height. A maximal vertical run of the same color exactly 2 stitches tall is corrected, even if it is connected horizontally to other stitches. Side-by-side matches and vertical runs taller than 2 remain unchanged; the tool reports the number of changed stitches.
 4. Open **Pixel editor** to adjust brightness, contrast, and saturation. Enable **Use two colors (white and dark grey)** for a two-color chart; adjust **Darkness threshold** to change which stitches are classified as dark. These settings regenerate the pattern until you paint stitches. After painting, generating again applies changed settings and replaces manual edits.
 
-Use **Preview larger** to inspect the chart. Select **Download PNG** to save an image of the pattern, including its grid lines.
+The pattern setup canvas is scrollable for inspecting wide or tall charts. Select **Download PNG** to save an image of the pattern, including its grid lines.
 
 Example input and generated chart:
 
