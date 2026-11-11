@@ -51,6 +51,7 @@ const thresholdInput = document.getElementById("darkThreshold");
 const thresholdValue = document.getElementById("darkThresholdValue");
 const thresholdControl = document.getElementById("thresholdControl");
 const downloadBtn = document.getElementById("downloadBtn");
+const editorDownloadBtn = document.getElementById("editorDownloadBtn");
 
 let uploadedImage = null;
 let guideImage = null;
@@ -196,6 +197,7 @@ function setupPattern(width, height) {
     gridRulerLayout.hidden = false;
     gridPlaceholder.hidden = true;
     downloadBtn.disabled = false;
+    editorDownloadBtn.disabled = false;
     saveProjectBtn.disabled = false;
     editorTab.disabled = false;
     crochetTab.disabled = false;
@@ -510,6 +512,7 @@ imageInput.addEventListener("change", function(event) {
             gridContainer.classList.remove("has-pattern");
             gridPlaceholder.hidden = false;
             downloadBtn.disabled = true;
+            editorDownloadBtn.disabled = true;
             crochetTab.disabled = true;
             editorTab.disabled = true;
             saveProjectBtn.disabled = true;
@@ -609,7 +612,7 @@ currentRowInput.addEventListener("change", function() {
     setCurrentRow(row);
 });
 
-downloadBtn.addEventListener("click", function() {
+function downloadPatternPng() {
     gridCanvas.toBlob(function(blob) {
         if (!blob) {
             status.textContent = "Could not create the pattern image.";
@@ -627,7 +630,10 @@ downloadBtn.addEventListener("click", function() {
             URL.revokeObjectURL(url);
         }, 1000);
     }, "image/png");
-});
+}
+
+downloadBtn.addEventListener("click", downloadPatternPng);
+editorDownloadBtn.addEventListener("click", downloadPatternPng);
 
 mosaicModeInput.addEventListener("change", updateMosaicMode);
 

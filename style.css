@@ -618,6 +618,12 @@ button:disabled {
     background-size: 16px 16px;
 }
 
+.editor-download-actions {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 12px;
+}
+
 .chart-coordinate-layout {
     display: grid;
     width: max-content;

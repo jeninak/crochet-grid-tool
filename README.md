@@ -62,7 +62,7 @@ Example input and generated chart:
 4. Click or drag across stitches to apply the selected color. White can be used to replace a stitch with the background color.
 5. Select **Undo last stroke** or press **Ctrl+Z** to revert the most recent click or drag. On macOS, use **Command+Z**. The shortcut is active in the pixel editor and does not override undo in text fields.
 
-Edits update the pattern and crochet workspace. Red highlights mark vertical same-color runs exactly 2 stitches tall created by edits; these warnings are visual only and do not recolor the pattern. Generating the pattern again from the source image replaces existing stitch edits.
+Edits update the pattern and crochet workspace. Red highlights mark vertical same-color runs exactly 2 stitches tall created by edits; these warnings are visual only and do not recolor the pattern. Use **Download PNG** in the editor toolbar to save the current pattern. The export includes the stitch grid but not the original-image guide or red warnings. Generating the pattern again from the source image replaces existing stitch edits.
 
 ![Pixel editor with stitch-color controls and an editable crochet grid](./assets/pixel-editor.png)
 
